@@ -1,3 +1,6 @@
+/NachOS-4.0/code/test/*
+!/NachOS-4.0/code/test/*.*
+
 # Created by https://www.toptal.com/developers/gitignore/api/c,c++,cmake
 # Edit at https://www.toptal.com/developers/gitignore?templates=c,c++,cmake
 
@@ -39,6 +42,7 @@
 *.i*86
 *.x86_64
 *.hex
+nachos
 
 # Debug files
 *.dSYM/
@@ -92,3 +96,8 @@ _deps
 *-prefix/
 
 # End of https://www.toptal.com/developers/gitignore/api/c,c++,cmake
+
+*.coff
+NachOS-4.0/coff2noff/coff2noff.x86Linux
+NachOS-4.0/code/build.linux/DISK_0
+NachOS-4.0/code/build.linux/Makefile.dep
