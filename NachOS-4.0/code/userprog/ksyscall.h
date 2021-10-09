@@ -86,6 +86,67 @@ void SysPrintChar(char c)
   kernel->synchConsoleOut->PutChar(c);
 }
 
+int SysReadNum()
+{
+	char c;
+	int res = 0;
+	bool isNegative = false;
+
+	c = SysReadChar();
+	while (c == ' ' || c == '\n')
+		c = SysReadChar();
+
+	if (c == '-')
+	{
+		isNegative = true;
+		c = SysReadChar();
+	}
+
+	while (c != ' ' && c != '\n')
+	{
+		if (c >= '0' && c <= '9')
+		{
+			res *= 10;
+			res += c - '0';
+
+			c = SysReadChar();
+		}
+		else
+			return 0;
+	}
+	
+	if (isNegative)
+		res *= -1;
+	
+	return res;
+}
+
+int SysRandomNum()
+{
+	RandomInit((unsigned int) time(NULL));
+    return RandomNumber();
+}
+
+void SysReadString(char* virtAddr, int length)
+{
+	char* buffer = new char[length + 1];
+	if (buffer == NULL)
+		return;
+
+	int i = -1;
+	while (i < length)
+	{
+		char c = SysReadChar();
+		if (c != '\n')
+			buffer[++i] = c;
+		else
+			break;
+	}
+	buffer[i + 1] = 0;
+	System2User((int) virtAddr, length, buffer);
+	delete[] buffer;
+}
+
 // Input: mot so nguyen integer
 // Output: khong
 // Chuc nang: In so nguyen len man hinh console
