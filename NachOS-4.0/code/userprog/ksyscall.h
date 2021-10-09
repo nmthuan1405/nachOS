@@ -29,4 +29,9 @@ char SysReadChar()
     return kernel->synchConsoleIn->GetChar();
 }
 
+void SysPrintChar(char c)
+{
+  kernel->synchConsoleOut->PutChar(c);
+}
+
 #endif /* ! __USERPROG_KSYSCALL_H__ */

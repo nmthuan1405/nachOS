@@ -94,6 +94,24 @@ void ExceptionHandler(ExceptionType which)
 
             return;
 
+        case SC_PrintChar:
+
+            SysPrintChar(kernel->machine->ReadRegister(4));
+
+            /* Modify return point */
+            {
+                /* set previous programm counter (debugging only)*/
+                kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+
+                /* set programm counter to next instruction (all Instructions are 4 byte wide)*/
+                kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+
+                /* set next programm counter for brach execution */
+                kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+            }
+
+            return;
+
             ASSERTNOTREACHED();
 
             break;
@@ -130,7 +148,7 @@ void ExceptionHandler(ExceptionType which)
 
             /* Process SysAdd Systemcall*/
             // int result;
-            result = (int) SysReadChar();
+            result = (int)SysReadChar();
 
             DEBUG(dbgSys, "SysReadChar returning with " << result << "\n");
             /* Prepare Result */
@@ -157,6 +175,45 @@ void ExceptionHandler(ExceptionType which)
             break;
         }
         break;
+
+    case NoException:
+        return;
+
+    case PageFaultException:
+        cerr << "Page fault exception\n";
+        SysHalt();
+        break;
+
+    case ReadOnlyException:
+        cerr << "Read only exception\n";
+        SysHalt();
+        break;
+
+    case BusErrorException:
+        cerr << "Bus error exception\n";
+        SysHalt();
+        break;
+
+    case AddressErrorException:
+        cerr << "Address error exception\n";
+        SysHalt();
+        break;
+
+    case OverflowException:
+        cerr << "Overflow exception\n";
+        SysHalt();
+        break;
+
+    case IllegalInstrException:
+        cerr << "Illegal instruction exception\n";
+        SysHalt();
+        break;
+
+    case NumExceptionTypes:
+        cerr << "Number exception\n";
+        SysHalt();
+        break;
+
     default:
         cerr << "Unexpected user mode exception" << (int)which << "\n";
         break;

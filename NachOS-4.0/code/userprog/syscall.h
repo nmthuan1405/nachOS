@@ -39,6 +39,8 @@
 #define SC_ReadNum  43
 #define SC_ReadChar  45
 
+#define SC_PrintChar 46
+
 #ifndef IN_ASM
 
 /* The system call interface.  These are the operations the Nachos
@@ -63,6 +65,8 @@ int Add(int op1, int op2);
 
 int ReadNum();
 char ReadChar();
+// Output a character on console
+void PrintChar(char character);
 
 /* Address space control operations: Exit, Exec, Execv, and Join */
 

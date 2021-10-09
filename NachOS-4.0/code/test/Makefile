@@ -112,7 +112,7 @@ ifeq ($(hosttype),unknown)
 PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
-PROGRAMS = add halt shell matmult sort segments readNum
+PROGRAMS = add halt shell matmult sort segments readNum printchar
 endif
 
 all: $(PROGRAMS)
@@ -159,10 +159,15 @@ matmult: matmult.o start.o
 
 readNum.o: readNum.c
 	$(CC) $(CFLAGS) -c readNum.c
-
 readNum: readNum.o start.o
 	$(LD) $(LDFLAGS) start.o readNum.o -o readNum.coff
 	$(COFF2NOFF) readNum.coff readNum
+
+printchar.o: printchar.c
+	$(CC) $(CFLAGS) -c printchar.c
+printchar: printchar.o start.o
+	$(LD) $(LDFLAGS) start.o printchar.o -o printchar.coff
+	$(COFF2NOFF) printchar.coff printchar
 
 clean:
 	$(RM) -f *.o *.ii
