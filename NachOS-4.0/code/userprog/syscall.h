@@ -41,6 +41,9 @@
 
 #define SC_PrintChar 46
 
+#define SC_PrintNum 44
+#define SC_PrintString 49
+
 #ifndef IN_ASM
 
 /* The system call interface.  These are the operations the Nachos
@@ -67,6 +70,11 @@ int ReadNum();
 char ReadChar();
 // Output a character on console
 void PrintChar(char character);
+// nhan vao mot so nguyen, in so nguyen do ra man hinh
+void PrintNum(int number);
+
+// nhan vao chuoi ky tu trong buffer, in chuoi do ra man hinh
+void PrintString(char buffer[]);
 
 /* Address space control operations: Exit, Exec, Execv, and Join */
 
