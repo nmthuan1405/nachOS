@@ -8,28 +8,25 @@
  *
  **************************************************************/
 
-#ifndef __USERPROG_KSYSCALL_H__ 
-#define __USERPROG_KSYSCALL_H__ 
+#ifndef __USERPROG_KSYSCALL_H__
+#define __USERPROG_KSYSCALL_H__
 
 #include "kernel.h"
-
-
-
+#include "synchconsole.h"
 
 void SysHalt()
 {
   kernel->interrupt->Halt();
 }
 
-
 int SysAdd(int op1, int op2)
 {
   return op1 + op2;
 }
 
-
-
-
-
+void SysPrintChar(char c)
+{
+  kernel->synchConsoleOut->PutChar(c);
+}
 
 #endif /* ! __USERPROG_KSYSCALL_H__ */
