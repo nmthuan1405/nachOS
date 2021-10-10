@@ -230,7 +230,7 @@ void ExceptionHandler(ExceptionType which)
 
         case SC_RandomNum:
         {
-            DEBUG(dbgSys, "Read number\n");
+            DEBUG(dbgSys, "Random number\n");
 
             int result;
             result = SysRandomNum();
@@ -258,7 +258,8 @@ void ExceptionHandler(ExceptionType which)
 
         case SC_ReadString:
         {
-            SysReadString((char *)kernel->machine->ReadRegister(4), (int)kernel->machine->ReadRegister(5));
+            DEBUG(dbgSys, "Read string\n");
+            SysReadString((char *) kernel->machine->ReadRegister(4), (int) kernel->machine->ReadRegister(5));
 
             /* Modify return point */
             {

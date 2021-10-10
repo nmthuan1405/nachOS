@@ -66,18 +66,22 @@ void Halt();
 
 int Add(int op1, int op2);
 
+// Read a number from console
 int ReadNum();
 
 // nhan vao mot so nguyen, in so nguyen do ra man hinh
 void PrintNum(int number);
 
+// Read a character from console
 char ReadChar();
 
 // Output a character on console
 void PrintChar(char character);
 
+// Create random number
 int RandomNum();
 
+// Read a string from console
 void ReadString(char buffer[], int length);
 
 // nhan vao chuoi ky tu trong buffer, in chuoi do ra man hinh

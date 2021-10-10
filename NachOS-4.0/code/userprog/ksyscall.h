@@ -76,39 +76,47 @@ int SysAdd(int op1, int op2)
 	return op1 + op2;
 }
 
+/*  Input:   None
+    Output:  int value
+    Purpose: Read an int number from console */
 int SysReadNum()
 {
 	char c;
 	int res = 0;
-	bool isNegative = false;
+	int sign = 1;
+	bool isValid = true;
 
+	// skip blank space and LF character
 	c = kernel->synchConsoleIn->GetChar();
 	while (c == ' ' || c == '\n')
 		c = kernel->synchConsoleIn->GetChar();
 
-	if (c == '-')
+	if (c == '-') // check negative
 	{
-		isNegative = true;
+		sign = -1;
 		c = kernel->synchConsoleIn->GetChar();
 	}
 
 	while (c != ' ' && c != '\n')
 	{
-		if (c >= '0' && c <= '9')
+		if (isValid) // if number is valid
 		{
-			res *= 10;
-			res += c - '0';
-
-			c = kernel->synchConsoleIn->GetChar();
+			if (c >= '0' && c <= '9')
+			{
+				res *= 10;
+				res += sign * (c - '0');
+				if ((sign > 0 && res < 0) || (sign < 0 && res > 0))  // overflow
+					isValid = false;
+			}
+			else
+				isValid = false;
 		}
-		else
-			return 0;
+		c = kernel->synchConsoleIn->GetChar();
 	}
 
-	if (isNegative)
-		res *= -1;
-
-	return res;
+	if (isValid)
+		return res;
+	return 0;
 }
 
 // Input: mot so nguyen integer
@@ -149,6 +157,9 @@ void SysPrintNum(int number)
 	}
 }
 
+/*  Input:   None
+    Output:  an character (char)
+    Purpose: Read a char from console */
 char SysReadChar()
 {
 	return kernel->synchConsoleIn->GetChar();
@@ -159,18 +170,26 @@ void SysPrintChar(char c)
 	kernel->synchConsoleOut->PutChar(c);
 }
 
+/*  Input:   None
+    Output:  a random value (int)
+    Purpose: Create random int value */
 int SysRandomNum()
 {
 	RandomInit((unsigned int)time(NULL));
 	return RandomNumber();
 }
 
+/*  Input:   - address of buffer to store string in user mode (char*)
+			 - max length of string
+    Output:  - None
+    Purpose: Read a string from console and store at provided address */
 void SysReadString(char *virtAddr, int length)
 {
-	char *buffer = new char[length + 1];
-	if (buffer == NULL)
+	char *buffer = new char[length + 1]; 
+	if (buffer == NULL) // cannot allocate
 		return;
 
+	// get char from console and put into buffer
 	int i = -1;
 	while (i < length)
 	{
@@ -180,8 +199,8 @@ void SysReadString(char *virtAddr, int length)
 		else
 			break;
 	}
-	buffer[i + 1] = 0;
-	System2User((int)virtAddr, length, buffer);
+	buffer[i + 1] = 0; // mark end of string
+	System2User((int)virtAddr, length, buffer); // copy to user memory
 	delete[] buffer;
 }
 
