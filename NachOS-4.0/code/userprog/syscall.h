@@ -69,7 +69,7 @@ int Add(int op1, int op2);
 // Read a number from console
 int ReadNum();
 
-// nhan vao mot so nguyen, in so nguyen do ra man hinh
+// Print a number to console
 void PrintNum(int number);
 
 // Read a character from console
@@ -84,7 +84,7 @@ int RandomNum();
 // Read a string from console
 void ReadString(char buffer[], int length);
 
-// nhan vao chuoi ky tu trong buffer, in chuoi do ra man hinh
+// Print a string to console
 void PrintString(char buffer[]);
 
 /* Address space control operations: Exit, Exec, Execv, and Join */

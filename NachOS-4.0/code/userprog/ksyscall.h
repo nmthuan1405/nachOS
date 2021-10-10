@@ -119,41 +119,55 @@ int SysReadNum()
 	return 0;
 }
 
-// Input: mot so nguyen integer
-// Output: khong
-// Chuc nang: In so nguyen len man hinh console
+/*	Input: int value
+	Output: None
+	Purpose: Print an int number to console */
 void SysPrintNum(int number)
 {
-	// truong hop input la so 0
+	// in case the input is 0
 	if (number == 0)
 	{
-		// in ra man hinh so 0
+		// print '0' to the console and return
 		kernel->synchConsoleOut->PutChar('0');
+		return;
 	}
 
-	// neu la so am, in dau tru ra man hinh va doi thanh so duong
+	// in case the input is a negative number, print minus sign to console
 	if (number < 0)
 	{
 		kernel->synchConsoleOut->PutChar('-');
-		number = -number;
 	}
 
-	int digitCount = 0; // bien dem so chu so
-	int digits[10];		// mang luu cac chu so (kieu int co toi da 10 chu so -2,147,483,648 -> 2,147,483,647)
+	int digitCount = 0; // stores number of digits
+	int digits[10];		// array stores each digit
+						// (int type has up to 10 digits: -2,147,483,648 -> 2,147,483,647)
 
-	// luu tung chu so tu phai qua trai vao mang digits va dem so chu so
-	while (number != 0)
+	// store each digit from right to left to the digits array and count the number of digits
+	// if number is a negative number, each digit will have a minus sign
+	int numberCopy = number;
+	while (numberCopy != 0)
 	{
-		digits[digitCount] = number % 10;
-		number /= 10;
+		digits[digitCount] = numberCopy % 10;
+		numberCopy /= 10;
 		digitCount++;
 	}
 
-	// in cac chu so ra man hinh theo thu tu nguoc lai
-	for (int i = 0; i < digitCount; i++)
+	// print digits array to console in reverse order
+	if(number > 0)
 	{
-		// (0 -> 9) + '0' = ('0' -> '9')
-		kernel->synchConsoleOut->PutChar(digits[digitCount - 1 - i] + 48); // '0' = 48
+		for (int i = 0; i < digitCount; i++)
+		{
+			// (0 -> 9) + '0' = ('0' -> '9')
+			kernel->synchConsoleOut->PutChar(digits[digitCount - 1 - i] + '0');
+		}
+	}
+	else
+	{
+		for (int i = 0; i < digitCount; i++)
+		{
+			// -(0 -> -9) + '0' = ('0' -> '9')
+			kernel->synchConsoleOut->PutChar(-digits[digitCount - 1 - i] + '0');
+		}
 	}
 }
 
@@ -204,45 +218,45 @@ void SysReadString(char *virtAddr, int length)
 	delete[] buffer;
 }
 
-// Input: dia chi vung nho user
-// Output: khong
-// Chuc nang: In chuoi len man hinh console
+// Input: Address of buffer stores string in user space
+// Output: None
+// Purpose: Print a string to console
 void SysPrintString(int virtAddr)
 {
-	// sao chep buffer co do dai 255 tu vung nho user sang vung nho system
+	// copy buffer from user memory space to system memory space
 	char *sysBuffer = User2System(virtAddr, 255);
 
-	// ket thuc neu system khong du vung nho
+	// return if system does not have enough memory
 	if (sysBuffer == NULL)
 		return;
 
-	// in tung ky tu trong buffer len man hinh console
+	// print each character in buffer to console
 	int index = 0;
 	while (sysBuffer[index] != 0)
 	{
 		kernel->synchConsoleOut->PutChar(sysBuffer[index]);
 		index++;
 
-		// neu system buffer da day nhung chuoi chua ket thuc
+		// if system buffer is full but the string is not ended
 		if (index == 255)
 		{
-			// thu hoi system buffer
+			// de-allocate system buffer
 			delete[] sysBuffer;
 			sysBuffer = NULL;
 
-			// sao chep 255 ky tu tiep theo tu vung nho user sang vung nho system
+			// copy next 255 characters from user memory space to system memory space
 			virtAddr += 255;
 			sysBuffer = User2System(virtAddr, 255);
 
-			// ket thuc neu system khong du vung nho
+			// return if system does not have enough memory
 			if (sysBuffer == NULL)
 				return;
 
-			// dat index lai tu 0
+			// reset index from 0
 			index = 0;
 		}
 	}
-	// thu hoi system buffer
+	// de-allocate system buffer
 	delete[] sysBuffer;
 }
 
