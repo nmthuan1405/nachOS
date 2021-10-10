@@ -94,7 +94,7 @@ void ExceptionHandler(ExceptionType which)
 			return;
 
 		case SC_PrintChar:
-			DEBUG(dbgSys, "Print character: " << kernel->machine->ReadRegister(4) << "/n");
+			DEBUG(dbgSys, "Print character: " << kernel->machine->ReadRegister(4) << "\n");
 
 			SysPrintChar(kernel->machine->ReadRegister(4));
 

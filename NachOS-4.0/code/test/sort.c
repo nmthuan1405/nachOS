@@ -33,5 +33,6 @@ int main(){
         PrintChar(' ');
     }
 
+    Halt();
     return 0;
 }
