@@ -82,14 +82,14 @@ int SysReadNum()
 	int res = 0;
 	bool isNegative = false;
 
-	c = SysReadChar();
+	c = kernel->synchConsoleIn->GetChar();
 	while (c == ' ' || c == '\n')
-		c = SysReadChar();
+		c = kernel->synchConsoleIn->GetChar();
 
 	if (c == '-')
 	{
 		isNegative = true;
-		c = SysReadChar();
+		c = kernel->synchConsoleIn->GetChar();
 	}
 
 	while (c != ' ' && c != '\n')
@@ -99,7 +99,7 @@ int SysReadNum()
 			res *= 10;
 			res += c - '0';
 
-			c = SysReadChar();
+			c = kernel->synchConsoleIn->GetChar();
 		}
 		else
 			return 0;
@@ -174,7 +174,7 @@ void SysReadString(char *virtAddr, int length)
 	int i = -1;
 	while (i < length)
 	{
-		char c = SysReadChar();
+		char c = kernel->synchConsoleIn->GetChar();
 		if (c != '\n')
 			buffer[++i] = c;
 		else
