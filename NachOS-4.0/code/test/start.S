@@ -178,6 +178,8 @@ ThreadJoin:
 	j 	$31
 	.end ThreadJoin
 
+
+
 	.globl  ReadNum
 	.ent	ReadNum
 ReadNum:
@@ -185,6 +187,14 @@ ReadNum:
 	syscall
 	j 	$31
 	.end ReadNum
+
+	.globl PrintNum
+	.ent	PrintNum
+PrintNum:
+	addiu $2,$0,SC_PrintNum
+	syscall
+	j	$31
+	.end PrintNum
 
 	.globl  ReadChar
 	.ent	ReadChar
@@ -202,22 +212,6 @@ PrintChar:
 	j	$31
 	.end PrintChar
 	
-	.globl PrintNum
-	.ent	PrintNum
-PrintNum:
-	addiu $2,$0,SC_PrintNum
-	syscall
-	j	$31
-	.end PrintNum
-
-	.globl PrintString
-	.ent	PrintString
-PrintString:
-	addiu $2,$0,SC_PrintString
-	syscall
-	j	$31
-	.end PrintString
-	
 	.globl RandomNum
 	.ent	RandomNum
 RandomNum:
@@ -233,7 +227,15 @@ ReadString:
 	syscall
 	j	$31
 	.end ReadString
-	
+
+	.globl PrintString
+	.ent	PrintString
+PrintString:
+	addiu $2,$0,SC_PrintString
+	syscall
+	j	$31
+	.end PrintString
+		
 /* dummy function to keep gcc happy */
         .globl  __main
         .ent    __main
