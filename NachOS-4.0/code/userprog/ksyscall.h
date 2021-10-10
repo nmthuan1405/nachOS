@@ -76,16 +76,6 @@ int SysAdd(int op1, int op2)
 	return op1 + op2;
 }
 
-char SysReadChar()
-{
-    return kernel->synchConsoleIn->GetChar();
-}
-
-void SysPrintChar(char c)
-{
-  kernel->synchConsoleOut->PutChar(c);
-}
-
 int SysReadNum()
 {
 	char c;
@@ -114,37 +104,11 @@ int SysReadNum()
 		else
 			return 0;
 	}
-	
+
 	if (isNegative)
 		res *= -1;
-	
+
 	return res;
-}
-
-int SysRandomNum()
-{
-	RandomInit((unsigned int) time(NULL));
-    return RandomNumber();
-}
-
-void SysReadString(char* virtAddr, int length)
-{
-	char* buffer = new char[length + 1];
-	if (buffer == NULL)
-		return;
-
-	int i = -1;
-	while (i < length)
-	{
-		char c = SysReadChar();
-		if (c != '\n')
-			buffer[++i] = c;
-		else
-			break;
-	}
-	buffer[i + 1] = 0;
-	System2User((int) virtAddr, length, buffer);
-	delete[] buffer;
 }
 
 // Input: mot so nguyen integer
@@ -158,31 +122,67 @@ void SysPrintNum(int number)
 		// in ra man hinh so 0
 		kernel->synchConsoleOut->PutChar('0');
 	}
-	
+
 	// neu la so am, in dau tru ra man hinh va doi thanh so duong
 	if (number < 0)
-    {
-        kernel->synchConsoleOut->PutChar('-');
-        number = -number;
-    }
+	{
+		kernel->synchConsoleOut->PutChar('-');
+		number = -number;
+	}
 
-	int digitCount = 0;	// bien dem so chu so
+	int digitCount = 0; // bien dem so chu so
 	int digits[10];		// mang luu cac chu so (kieu int co toi da 10 chu so -2,147,483,648 -> 2,147,483,647)
 
 	// luu tung chu so tu phai qua trai vao mang digits va dem so chu so
 	while (number != 0)
-    {
-        digits[digitCount] = number % 10;
-        number /= 10;
-        digitCount++;
-    }
+	{
+		digits[digitCount] = number % 10;
+		number /= 10;
+		digitCount++;
+	}
 
 	// in cac chu so ra man hinh theo thu tu nguoc lai
-	for(int i = 0; i < digitCount; i++)
+	for (int i = 0; i < digitCount; i++)
 	{
 		// (0 -> 9) + '0' = ('0' -> '9')
-		kernel->synchConsoleOut->PutChar(digits[digitCount - 1 - i] + 48);	// '0' = 48
+		kernel->synchConsoleOut->PutChar(digits[digitCount - 1 - i] + 48); // '0' = 48
 	}
+}
+
+char SysReadChar()
+{
+	return kernel->synchConsoleIn->GetChar();
+}
+
+void SysPrintChar(char c)
+{
+	kernel->synchConsoleOut->PutChar(c);
+}
+
+int SysRandomNum()
+{
+	RandomInit((unsigned int)time(NULL));
+	return RandomNumber();
+}
+
+void SysReadString(char *virtAddr, int length)
+{
+	char *buffer = new char[length + 1];
+	if (buffer == NULL)
+		return;
+
+	int i = -1;
+	while (i < length)
+	{
+		char c = SysReadChar();
+		if (c != '\n')
+			buffer[++i] = c;
+		else
+			break;
+	}
+	buffer[i + 1] = 0;
+	System2User((int)virtAddr, length, buffer);
+	delete[] buffer;
 }
 
 // Input: dia chi vung nho user
@@ -190,38 +190,38 @@ void SysPrintNum(int number)
 // Chuc nang: In chuoi len man hinh console
 void SysPrintString(int virtAddr)
 {
-	// sao chep buffer co do dai 255 tu vung nho user sang vung nho system 
+	// sao chep buffer co do dai 255 tu vung nho user sang vung nho system
 	char *sysBuffer = User2System(virtAddr, 255);
 
 	// ket thuc neu system khong du vung nho
-	if(sysBuffer == NULL)
+	if (sysBuffer == NULL)
 		return;
-	
+
 	// in tung ky tu trong buffer len man hinh console
 	int index = 0;
-    while (sysBuffer[index] != 0)
-    {
-        kernel->synchConsoleOut->PutChar(sysBuffer[index]);
-        index++;
+	while (sysBuffer[index] != 0)
+	{
+		kernel->synchConsoleOut->PutChar(sysBuffer[index]);
+		index++;
 
-        // neu system buffer da day nhung chuoi chua ket thuc
-        if (index == 255)
-        {
+		// neu system buffer da day nhung chuoi chua ket thuc
+		if (index == 255)
+		{
 			// thu hoi system buffer
-            delete[] sysBuffer;
+			delete[] sysBuffer;
 			sysBuffer = NULL;
 
 			// sao chep 255 ky tu tiep theo tu vung nho user sang vung nho system
-            virtAddr += 255;
-            sysBuffer = User2System(virtAddr, 255);
+			virtAddr += 255;
+			sysBuffer = User2System(virtAddr, 255);
 
-            // ket thuc neu system khong du vung nho
-            if (sysBuffer == NULL)
-                return;
+			// ket thuc neu system khong du vung nho
+			if (sysBuffer == NULL)
+				return;
 
 			// dat index lai tu 0
-            index = 0;
-        }
+			index = 0;
+		}
 	}
 	// thu hoi system buffer
 	delete[] sysBuffer;
