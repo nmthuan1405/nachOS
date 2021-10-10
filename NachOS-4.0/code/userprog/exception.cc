@@ -51,11 +51,49 @@
 void ExceptionHandler(ExceptionType which)
 {
     int type = kernel->machine->ReadRegister(2);
-
     DEBUG(dbgSys, "Received Exception " << which << " type: " << type << "\n");
 
     switch (which)
     {
+    case NoException:
+        return;
+        break;
+
+    case PageFaultException:
+        cerr << "Page fault exception\n";
+        SysHalt();
+        break;
+
+    case ReadOnlyException:
+        cerr << "Read only exception\n";
+        SysHalt();
+        break;
+
+    case BusErrorException:
+        cerr << "Bus error exception\n";
+        SysHalt();
+        break;
+
+    case AddressErrorException:
+        cerr << "Address error exception\n";
+        SysHalt();
+        break;
+
+    case OverflowException:
+        cerr << "Overflow exception\n";
+        SysHalt();
+        break;
+
+    case IllegalInstrException:
+        cerr << "Illegal instruction exception\n";
+        SysHalt();
+        break;
+
+    case NumExceptionTypes:
+        cerr << "Number exception\n";
+        SysHalt();
+        break;
+
     case SyscallException:
         switch (type)
         {
@@ -92,27 +130,7 @@ void ExceptionHandler(ExceptionType which)
             }
 
             return;
-
-        case SC_PrintChar:
-
-            SysPrintChar(kernel->machine->ReadRegister(4));
-
-            /* Modify return point */
-            {
-                /* set previous programm counter (debugging only)*/
-                kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
-
-                /* set programm counter to next instruction (all Instructions are 4 byte wide)*/
-                kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
-
-                /* set next programm counter for brach execution */
-                kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
-            }
-
-            return;
-
             ASSERTNOTREACHED();
-
             break;
 
         case SC_ReadNum:
@@ -123,82 +141,6 @@ void ExceptionHandler(ExceptionType which)
             result = SysReadNum();
 
             DEBUG(dbgSys, "SysReadNum returning with " << result << "\n");
-            /* Prepare Result */
-            kernel->machine->WriteRegister(2, (int)result);
-
-            /* Modify return point */
-            {
-                /* set previous programm counter (debugging only)*/
-                kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
-
-                /* set programm counter to next instruction (all Instructions are 4 byte wide)*/
-                kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
-
-                /* set next programm counter for brach execution */
-                kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
-            }
-
-            return;
-            ASSERTNOTREACHED();
-            break;
-        }
-
-        case SC_RandomNum:
-        {
-            DEBUG(dbgSys, "Read number\n");
-
-            int result;
-            result = SysRandomNum();
-
-            DEBUG(dbgSys, "SysRandomNum returning with " << result << "\n");
-            /* Prepare Result */
-            kernel->machine->WriteRegister(2, (int)result);
-
-            /* Modify return point */
-            {
-                /* set previous programm counter (debugging only)*/
-                kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
-
-                /* set programm counter to next instruction (all Instructions are 4 byte wide)*/
-                kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
-
-                /* set next programm counter for brach execution */
-                kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
-            }
-
-            return;
-            ASSERTNOTREACHED();
-            break;
-        }
-
-        case SC_ReadString:
-        {
-            SysReadString((char*) kernel->machine->ReadRegister(4), (int)kernel->machine->ReadRegister(5));
-
-            /* Modify return point */
-            {
-                /* set previous programm counter (debugging only)*/
-                kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
-
-                /* set programm counter to next instruction (all Instructions are 4 byte wide)*/
-                kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
-
-                /* set next programm counter for brach execution */
-                kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
-            }
-
-            return;
-            ASSERTNOTREACHED();
-            break;
-        }
-
-        case SC_ReadChar:
-        {
-            DEBUG(dbgSys, "Read character\n");
-            char result;
-            result = SysReadChar();
-
-            DEBUG(dbgSys, "SysReadChar returning with " << result << "\n");
             /* Prepare Result */
             kernel->machine->WriteRegister(2, (int)result);
 
@@ -236,10 +178,104 @@ void ExceptionHandler(ExceptionType which)
             }
 
             return;
-
             ASSERTNOTREACHED();
-
             break;
+
+        case SC_ReadChar:
+        {
+            DEBUG(dbgSys, "Read character\n");
+            char result;
+            result = SysReadChar();
+
+            DEBUG(dbgSys, "SysReadChar returning with " << result << "\n");
+            /* Prepare Result */
+            kernel->machine->WriteRegister(2, (int)result);
+
+            /* Modify return point */
+            {
+                /* set previous programm counter (debugging only)*/
+                kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+
+                /* set programm counter to next instruction (all Instructions are 4 byte wide)*/
+                kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+
+                /* set next programm counter for brach execution */
+                kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+            }
+
+            return;
+            ASSERTNOTREACHED();
+            break;
+        }
+
+        case SC_PrintChar:
+
+            SysPrintChar(kernel->machine->ReadRegister(4));
+
+            /* Modify return point */
+            {
+                /* set previous programm counter (debugging only)*/
+                kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+
+                /* set programm counter to next instruction (all Instructions are 4 byte wide)*/
+                kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+
+                /* set next programm counter for brach execution */
+                kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+            }
+
+            return;
+            ASSERTNOTREACHED();
+            break;
+
+        case SC_RandomNum:
+        {
+            DEBUG(dbgSys, "Read number\n");
+
+            int result;
+            result = SysRandomNum();
+
+            DEBUG(dbgSys, "SysRandomNum returning with " << result << "\n");
+            /* Prepare Result */
+            kernel->machine->WriteRegister(2, (int)result);
+
+            /* Modify return point */
+            {
+                /* set previous programm counter (debugging only)*/
+                kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+
+                /* set programm counter to next instruction (all Instructions are 4 byte wide)*/
+                kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+
+                /* set next programm counter for brach execution */
+                kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+            }
+
+            return;
+            ASSERTNOTREACHED();
+            break;
+        }
+
+        case SC_ReadString:
+        {
+            SysReadString((char *)kernel->machine->ReadRegister(4), (int)kernel->machine->ReadRegister(5));
+
+            /* Modify return point */
+            {
+                /* set previous programm counter (debugging only)*/
+                kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+
+                /* set programm counter to next instruction (all Instructions are 4 byte wide)*/
+                kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+
+                /* set next programm counter for brach execution */
+                kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+            }
+
+            return;
+            ASSERTNOTREACHED();
+            break;
+        }
 
         case SC_PrintString:
             DEBUG(dbgSys, "PrintString " << kernel->machine->ReadRegister(4) << "\n");
@@ -267,44 +303,6 @@ void ExceptionHandler(ExceptionType which)
             cerr << "Unexpected system call " << type << "\n";
             break;
         }
-        break;
-
-    case NoException:
-        return;
-
-    case PageFaultException:
-        cerr << "Page fault exception\n";
-        SysHalt();
-        break;
-
-    case ReadOnlyException:
-        cerr << "Read only exception\n";
-        SysHalt();
-        break;
-
-    case BusErrorException:
-        cerr << "Bus error exception\n";
-        SysHalt();
-        break;
-
-    case AddressErrorException:
-        cerr << "Address error exception\n";
-        SysHalt();
-        break;
-
-    case OverflowException:
-        cerr << "Overflow exception\n";
-        SysHalt();
-        break;
-
-    case IllegalInstrException:
-        cerr << "Illegal instruction exception\n";
-        SysHalt();
-        break;
-
-    case NumExceptionTypes:
-        cerr << "Number exception\n";
-        SysHalt();
         break;
 
     default:
