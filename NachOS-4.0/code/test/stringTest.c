@@ -1,5 +1,5 @@
 #include "syscall.h"
-#define MAX_LENGTH 10
+#define MAX_LENGTH 255
 int main()
 {
     char a[MAX_LENGTH];

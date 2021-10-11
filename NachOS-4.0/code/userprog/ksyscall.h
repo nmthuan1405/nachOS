@@ -14,6 +14,8 @@
 #include "kernel.h"
 #include "synchconsole.h"
 
+#define BUFFER_MAX_LENGTH 255
+
 /*  Input:  - User space address (int)        
             - Limit of buffer (int) 
     Output: - Buffer (char*) 
@@ -202,6 +204,9 @@ int SysRandomNum()
     Purpose: Read a string from console and store at provided address */
 void SysReadString(char *virtAddr, int length)
 {
+	if (length < 0) // invalid length
+		return;
+
 	char *buffer = new char[length + 1]; 
 	if (buffer == NULL) // cannot allocate
 		return;
@@ -221,13 +226,13 @@ void SysReadString(char *virtAddr, int length)
 	delete[] buffer;
 }
 
-// Input: Address of buffer stores string in user space
-// Output: None
-// Purpose: Print a string to console
+/*	Input: Address of buffer stores string in user space
+	Output: None
+	Purpose: Print a string to console */
 void SysPrintString(int virtAddr)
 {
 	// copy buffer from user memory space to system memory space
-	char *sysBuffer = User2System(virtAddr, 255);
+	char *sysBuffer = User2System(virtAddr, BUFFER_MAX_LENGTH);
 
 	// return if system does not have enough memory
 	if (sysBuffer == NULL)
@@ -241,15 +246,15 @@ void SysPrintString(int virtAddr)
 		index++;
 
 		// if system buffer is full but the string is not ended
-		if (index == 255)
+		if (index == BUFFER_MAX_LENGTH)
 		{
 			// de-allocate system buffer
 			delete[] sysBuffer;
 			sysBuffer = NULL;
 
-			// copy next 255 characters from user memory space to system memory space
-			virtAddr += 255;
-			sysBuffer = User2System(virtAddr, 255);
+			// copy next BUFFER_MAX_LENGTH characters from user memory space to system memory space
+			virtAddr += BUFFER_MAX_LENGTH;
+			sysBuffer = User2System(virtAddr, BUFFER_MAX_LENGTH);
 
 			// return if system does not have enough memory
 			if (sysBuffer == NULL)
