@@ -202,6 +202,9 @@ int SysRandomNum()
     Purpose: Read a string from console and store at provided address */
 void SysReadString(char *virtAddr, int length)
 {
+	if (length < 0) // invalid length
+		return;
+
 	char *buffer = new char[length + 1]; 
 	if (buffer == NULL) // cannot allocate
 		return;
