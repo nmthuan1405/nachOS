@@ -172,13 +172,16 @@ void SysPrintNum(int number)
 }
 
 /*  Input:   None
-    Output:  an character (char)
+    Output:  a character (char)
     Purpose: Read a char from console */
 char SysReadChar()
 {
 	return kernel->synchConsoleIn->GetChar();
 }
 
+/*  Input:   a character 
+    Output:  None
+    Purpose: Print a character to console */
 void SysPrintChar(char c)
 {
 	kernel->synchConsoleOut->PutChar(c);
