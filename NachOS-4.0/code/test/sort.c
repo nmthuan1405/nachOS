@@ -1,69 +1,67 @@
-/* sort.c 
- *    Test program to sort a large number of integers.
- *
- *    Intention is to stress virtual memory system.
- *
- *    Ideally, we could read the unsorted array off of the file system,
- *	and store the result back to the file system!
- */
-
-
-/*
-#define UNIX
-#define UNIX_DEBUG
-*/
-
-#ifdef UNIX
-#include <stdio.h>
-#define Exit exit
-#else
 #include "syscall.h"
-#endif /* UNIX */
 
-#define SIZE (1024)
+int main(){
+    int n;
+    int a[100];
+    char ord; // ord = i for increasing order, ord = d for decreasing order
+    int i, j, temp;
 
-int A[SIZE];	/* size of physical memory; with code, we'll run out of space!*/
-
-int
-main()
-{
-    int i, j, tmp;
-
-    /* first initialize the array, in reverse sorted order */
-    for (i = 0; i < SIZE; i++) {
-        A[i] = (SIZE-1) - i;
+    PrintString("Enter number of elements (0<n<=100): ");
+    n = ReadNum();
+    // handle n>100
+    while (n>100 || n<=0){
+        PrintString("Invalid number!\n");
+        PrintString("Enter number of elements (0<n<=100): ");
+        n = ReadNum();
     }
 
-    /* then sort! */
-    for (i = 0; i < SIZE; i++) {
-        for (j = 0; j < (SIZE-1); j++) {
-	   if (A[j] > A[j + 1]) {	/* out of order -> need to swap ! */
-	      tmp = A[j];
-	      A[j] = A[j + 1];
-	      A[j + 1] = tmp;
-    	   }
-        }
+    PrintString("Enter elements: ");
+    for (i=0; i<n; i++){
+        a[i] = ReadNum();
     }
 
-#ifdef UNIX_DEBUG
-    for (i=0; i<SIZE; i++) {
-        printf("%4d ", A[i]);
-	if (((i+1) % 15) == 0) {
-		printf("\n");
-        }
-        if (A[i] != i) {
-            fprintf(stderr, "Out of order A[%d] = %d\n", i, A[i]);
-            Exit(1);
-        }   
-    }
-    printf("\n");
-#endif /* UNIX_DEBUG */
+    // choose order
+    PrintString("Choose the order to sort: \n");
+    PrintString("i for increasing order\n");
+    PrintString("d for decreasing order\n");
+    PrintString("Enter the order: ");
+    ord = ReadChar();
 
-    for (i=0; i<SIZE; i++) {
-        if (A[i] != i) {
-            Exit(1);
-        }   
+    // bubble sort in increasing order
+    if (ord == 'i'){
+        for (i=0; i<n; i++)
+            for (j=0; j<n-i-1; j++)
+                if (a[j] > a[j+1]){
+                    temp = a[j];
+                    a[j] = a[j+1];
+                    a[j+1] = temp;
+                }
+    }
+    // bubble sort in decreasing order
+    else if (ord == 'd'){
+        for (i=0; i<n; i++)
+            for (j=0; j<n-i-1; j++)
+                if (a[j] < a[j+1]){
+                    temp = a[j];
+                    a[j] = a[j+1];
+                    a[j+1] = temp;
+                }
+    }
+    // handle invalid order
+    else{
+        PrintString("Invalid order!\n");
+        Halt();
+        return 0;
     }
 
-    Exit(0);
+    // print result
+    PrintString("Sorted array: ");
+    for (i=0; i<n; i++){
+        PrintNum(a[i]);
+        PrintChar(' ');
+    }
+    PrintString("\n");
+
+    Halt();
+    return 0;
 }
