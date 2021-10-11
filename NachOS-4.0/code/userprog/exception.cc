@@ -209,6 +209,7 @@ void ExceptionHandler(ExceptionType which)
         }
 
         case SC_PrintChar:
+            DEBUG(dbgSys, "Print character: " << kernel->machine->ReadRegister(4) << "\n");
 
             SysPrintChar(kernel->machine->ReadRegister(4));
 
