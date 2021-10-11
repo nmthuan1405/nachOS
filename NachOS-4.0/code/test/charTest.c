@@ -4,7 +4,7 @@ int main()
 {
     char a;
     PrintString("Enter a character: ");
-    ReadChar(a);
+    a = ReadChar();
 
     PrintString("You have entered: ");
     PrintChar(a);
