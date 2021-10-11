@@ -4,8 +4,8 @@ int
 main()
 {
     SpaceId newProc;
-    OpenFileId input = ABCConsoleInput;
-    OpenFileId output = ABCConsoleOutput;
+    OpenFileId input = CONSOLEINPUT;
+    OpenFileId output = CONSOLEOUTPUT;
     char prompt[2], ch, buffer[60];
     int i;
 

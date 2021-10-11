@@ -35,9 +35,14 @@
 #define SC_ThreadExit   14
 #define SC_ThreadJoin   15
 
-#define SC_Add		42
-
-#define SC_PrintChar 46
+#define SC_Add		   42
+#define SC_ReadNum     43
+#define SC_PrintNum    44
+#define SC_ReadChar    45
+#define SC_PrintChar   46
+#define SC_RandomNum   47
+#define SC_ReadString  48
+#define SC_PrintString 49
 
 #ifndef IN_ASM
 
@@ -61,8 +66,22 @@ void Halt();
 
 int Add(int op1, int op2);
 
+int ReadNum();
+
+// nhan vao mot so nguyen, in so nguyen do ra man hinh
+void PrintNum(int number);
+
+char ReadChar();
+
 // Output a character on console
 void PrintChar(char character);
+
+int RandomNum();
+
+void ReadString(char buffer[], int length);
+
+// nhan vao chuoi ky tu trong buffer, in chuoi do ra man hinh
+void PrintString(char buffer[]);
 
 /* Address space control operations: Exit, Exec, Execv, and Join */
 
@@ -110,8 +129,8 @@ typedef int OpenFileId;
  * the console device.
  */
 
-#define ABCConsoleInput	0  
-#define ABCConsoleOutput	1  
+#define CONSOLEINPUT	0  
+#define CONSOLEOUTPUT	1  
  
 /* Create a Nachos file, with name "name" */
 /* Note: Create does not open the file.   */
