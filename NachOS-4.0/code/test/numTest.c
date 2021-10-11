@@ -9,6 +9,10 @@ int main()
     PrintNum(a);
     PrintChar('\n');
 
+    PrintString("Random number: ");
+    PrintNum(RandomNum());
+    PrintChar('\n');
+
     Halt();
     /* not reached */
 }
