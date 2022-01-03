@@ -112,7 +112,7 @@ ifeq ($(hosttype),unknown)
 PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
-PROGRAMS = add halt shell matmult segments numTest charTest stringTest help sort ascii 
+PROGRAMS = add halt shell matmult segments numTest charTest stringTest help sort ascii createFileTest
 endif
 
 all: $(PROGRAMS)
@@ -186,6 +186,12 @@ ascii.o: ascii.c
 ascii: ascii.o start.o
 	$(LD) $(LDFLAGS) start.o ascii.o -o ascii.coff
 	$(COFF2NOFF) ascii.coff ascii
+
+createFileTest.o: createFileTest.c
+	$(CC) $(CFLAGS) -c createFileTest.c
+createFileTest: createFileTest.o start.o
+	$(LD) $(LDFLAGS) start.o createFileTest.o -o createFileTest.coff
+	$(COFF2NOFF) createFileTest.coff createFileTest
 
 clean:
 	$(RM) -f *.o *.ii

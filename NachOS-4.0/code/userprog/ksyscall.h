@@ -13,8 +13,10 @@
 
 #include "kernel.h"
 #include "synchconsole.h"
+#include "filesys.h"
 
 #define BUFFER_MAX_LENGTH 255
+#define FILE_MAX_LENGTH 32
 
 /*  Input:  - User space address (int)        
             - Limit of buffer (int) 
@@ -266,6 +268,27 @@ void SysPrintString(int virtAddr)
 	}
 	// de-allocate system buffer
 	delete[] sysBuffer;
+}
+
+int SysCreateFile(int virtAddr){
+	char* name = User2System(virtAddr, FILE_MAX_LENGTH + 1);
+	if (strlen(name) == 0){
+		printf("Invalid file name!");
+		return -1;
+	}
+	if (name == NULL){
+		printf("Not enough system memory!");
+		delete[] name;
+		return -1;
+	}
+	if (!kernel->fileSystem->Create(name, 0)){
+		printf("Create file unsuccessfully!");
+		delete[] name;
+		return -1;
+	}
+	printf("Create file successfully!");
+	delete[] name;
+	return 0;
 }
 
 #endif /* ! __USERPROG_KSYSCALL_H__ */

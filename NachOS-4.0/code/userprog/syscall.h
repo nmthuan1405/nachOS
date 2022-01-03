@@ -44,6 +44,8 @@
 #define SC_ReadString  48
 #define SC_PrintString 49
 
+#define SC_CreateFile 50
+
 #ifndef IN_ASM
 
 /* The system call interface.  These are the operations the Nachos
@@ -201,6 +203,8 @@ int ThreadJoin(ThreadId id);
  * Deletes current thread and returns ExitCode to every waiting lokal thread.
  */
 void ThreadExit(int ExitCode);	
+
+int CreateFile(char *name);
 
 #endif /* IN_ASM */
 
