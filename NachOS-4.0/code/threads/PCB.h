@@ -10,6 +10,7 @@ private:
     int exitcode;
     int numwait;        // number of process joined
     FileTable* fileTable;
+    Thread* thread;
 public:
     int parentID;
 public:
