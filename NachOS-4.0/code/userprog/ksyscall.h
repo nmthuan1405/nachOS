@@ -291,4 +291,8 @@ int SysCreateFile(int virtAddr){
 	return 0;
 }
 
+int SysJoin(int id){
+	return kernel->pTab->JoinUpdate(id);
+}
+
 #endif /* ! __USERPROG_KSYSCALL_H__ */

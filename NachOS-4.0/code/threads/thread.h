@@ -88,6 +88,8 @@ class Thread {
 					// must not be running when delete 
 					// is called
 
+    int processID;
+
     // basic thread operations
 
     void Fork(VoidFunctionPtr func, void *arg); 

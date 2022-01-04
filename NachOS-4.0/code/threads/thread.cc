@@ -45,6 +45,7 @@ Thread::Thread(char* threadName)
 					// of machine registers
     }
     space = NULL;
+    processID = 0;
 }
 
 //----------------------------------------------------------------------
