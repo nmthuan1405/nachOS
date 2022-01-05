@@ -9,7 +9,7 @@
 
 class PTable{
     private:
-        BitMap *bm;
+        Bitmap *bm;
         PCB *pcb[MAX_PROCESS];
         int psize;
         Semaphore* bmsem;

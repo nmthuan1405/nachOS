@@ -1,6 +1,35 @@
 
 #include "ptable.h"
 
+PTable::PTable(int size){
+
+    psize = size;
+    bm = new Bitmap(size);
+    bmsem = new Semaphore("bmsem", 1);
+
+    for (int i = 0; i < MAX_PROCESS; i++){
+        pcb[i] = NULL;
+    }
+
+    bm->Mark(0);
+}
+
+PTable::~PTable(){
+    if (bm != NULL){
+        delete bm;
+    }
+
+    if (bmsem != NULL){
+        delete bmsem;
+    }
+
+    for (int i = 0; i < MAX_PROCESS; i++){
+        if (pcb[i] != NULL){
+            delete pcb[i];
+        }
+    }
+}
+
 int PTable::JoinUpdate(int id){
     // Kiem tra tinh hop le cua id
     if (id < 0 || id > 9){
