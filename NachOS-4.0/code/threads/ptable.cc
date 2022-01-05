@@ -56,3 +56,43 @@ int PTable::JoinUpdate(int id){
     // Tra ve exitcode
     return exitcode;
 }
+
+int PTable::ExitUpdate(int ec){
+    int id = kernel->currentThread->processID;
+
+    // Neu tien trinh khong ton tai
+    if (!IsExist(id)){
+        printf("The process does not exist\n");
+        return -1;
+    }
+
+    // Tien trinh la main process
+    if (id == 0){
+        kernel->interrupt->Halt();
+        return 0;
+    }
+
+    // Nguoc lai set exitcode cho tien trinh goi
+    pcb[id]->SetExitCode(ec);
+    pcb[pcb[id]->parentID]->DecNumWait();
+
+    // Goi JoinRelease de giai phong tien trinh cha dang doi
+    pcb[id]->JoinRelease();
+
+    // Goi ExitWait de xin tien trinh cha cho phep thoat
+    pcb[id]->ExitWait();
+
+    Remove(id);
+    return ec;
+}
+
+bool PTable::IsExist(int pid){
+    return bm->Test(pid);
+}
+
+void PTable::Remove(int pid){
+    bm->Clear(pid);
+    if (pcb[pid] != NULL){
+        delete pcb[pid];
+    }
+}
