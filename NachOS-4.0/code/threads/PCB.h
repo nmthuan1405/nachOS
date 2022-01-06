@@ -1,4 +1,5 @@
-#include "FileTable.h"
+#ifndef PCB_H
+#define PCB_H
 #include "synch.h"
 
 class PCB
@@ -9,7 +10,7 @@ private:
     Semaphore* multex;  // semaphore for exclusive access
     int exitcode;
     int numwait;        // number of process joined
-    FileTable* fileTable;
+    // FileTable* fileTable;
     Thread* thread;
 public:
     int parentID;
@@ -32,3 +33,6 @@ public:
     void SetFileName(char* fn);
     char* GetFileName();
 };
+
+void StartProcess_2(int id);
+#endif

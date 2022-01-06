@@ -291,6 +291,17 @@ int SysCreateFile(int virtAddr){
 	return 0;
 }
 
+int SysExec(int virAddr)
+{
+	char* fileName = User2System(virAddr, 255);
+    if (fileName == NULL){
+        return -1;
+    }
+
+    int pid = kernel->pTab->ExecUpdate(fileName);
+    return pid;
+}
+
 int SysJoin(int id){
 	return kernel->pTab->JoinUpdate(id);
 }

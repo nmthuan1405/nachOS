@@ -30,6 +30,50 @@ PTable::~PTable(){
     }
 }
 
+int PTable::ExecUpdate(char* name){
+    // Gọi mutex->P(); để giúp tránh tình trạng nạp 2 tiến trình cùng 1 lúc
+    bmsem->P();
+
+    // Kiểm tra tính hợp lệ của chương trình “name”
+    if (name == NULL || strlen(name) == 0){
+        bmsem->V();
+        return -1;
+    }
+
+    // Kiểm tra sự tồn tại của chương trình “name” bằng cách gọi phương thức Open của lớp fileSystem
+    OpenFile* file = kernel->fileSystem->Open(name);
+    if (file == NULL){
+        bmsem->V();
+        return -1;
+    }
+
+    // So sánh tên chương trình và tên của currentThread để chắc chắn rằng chương trình này không gọi thực thi chính nó.
+    if( strcmp(name,"./test/scheduler") == 0 || strcmp(name,kernel->currentThread->getName()) == 0 )
+	{	
+		bmsem->V();
+		return -1;
+	}
+
+    // Tìm slot trống trong bảng Ptable
+    int index = this->GetFreeSlot();
+    if(index < 0)
+	{
+		bmsem->V();
+		return -1;
+	}
+
+    // Nếu có slot trống thì khởi tạo một PCB mới với processID chính là index của slot này, parrentID là processID của currentThread.
+    pcb[index] = new PCB(index);
+	pcb[index]->SetFileName(name);
+    pcb[index]->parentID = kernel->currentThread->processID;
+
+    // Gọi thực thi phương thức Exec của lớp PCB
+    int pid = pcb[index]->Exec(name, index);
+
+    bmsem->V();
+    return pid;
+}
+
 int PTable::JoinUpdate(int id){
     // Kiem tra tinh hop le cua id
     if (id < 0 || id > 9){
