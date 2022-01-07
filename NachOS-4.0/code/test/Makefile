@@ -112,7 +112,7 @@ ifeq ($(hosttype),unknown)
 PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
-PROGRAMS = add halt shell matmult segments numTest charTest stringTest help sort ascii createFileTest
+PROGRAMS = add halt shell matmult segments numTest charTest stringTest help sort ascii createFileTest ping pong pingpong
 endif
 
 all: $(PROGRAMS)
@@ -192,6 +192,24 @@ createFileTest.o: createFileTest.c
 createFileTest: createFileTest.o start.o
 	$(LD) $(LDFLAGS) start.o createFileTest.o -o createFileTest.coff
 	$(COFF2NOFF) createFileTest.coff createFileTest
+
+ping.o: ping.c
+	$(CC) $(CFLAGS) -c ping.c
+ping: ping.o start.o
+	$(LD) $(LDFLAGS) start.o ping.o -o ping.coff
+	$(COFF2NOFF) ping.coff ping
+
+pong.o: pong.c
+	$(CC) $(CFLAGS) -c pong.c
+pong: pong.o start.o
+	$(LD) $(LDFLAGS) start.o pong.o -o pong.coff
+	$(COFF2NOFF) pong.coff pong
+
+pingpong.o: pingpong.c
+	$(CC) $(CFLAGS) -c pingpong.c
+pingpong: pingpong.o start.o
+	$(LD) $(LDFLAGS) start.o pingpong.o -o pingpong.coff
+	$(COFF2NOFF) pingpong.coff pingpong
 
 clean:
 	$(RM) -f *.o *.ii
