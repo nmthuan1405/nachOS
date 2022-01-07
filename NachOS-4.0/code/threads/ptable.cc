@@ -12,6 +12,8 @@ PTable::PTable(int size)
     }
 
     bm->Mark(0);
+    pcb[0] = new PCB(0);
+    pcb[0]->parentID = -1;
 }
 
 PTable::~PTable()
@@ -54,6 +56,7 @@ int PTable::ExecUpdate(char *name)
         bmsem->V();
         return -1;
     }
+    delete file;
 
     // So sánh tên chương trình và tên của currentThread để chắc chắn rằng chương trình này không gọi thực thi chính nó.
     if (strcmp(name, "./test/scheduler") == 0 || strcmp(name, kernel->currentThread->getName()) == 0)
@@ -72,7 +75,7 @@ int PTable::ExecUpdate(char *name)
 
     // Nếu có slot trống thì khởi tạo một PCB mới với processID chính là index của slot này, parrentID là processID của currentThread.
     pcb[index] = new PCB(index);
-    pcb[index]->SetFileName(name);
+    // pcb[index]->SetFileName(name);
     pcb[index]->parentID = kernel->currentThread->processID;
 
     // Gọi thực thi phương thức Exec của lớp PCB
