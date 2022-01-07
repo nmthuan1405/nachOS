@@ -15,7 +15,7 @@ private:
 public:
     STable();
     ~STable();
-    int Create(char *name);
+    int Create(char *name, int semval);
     int Wait(char *name);
     int Signal(char *name);
     int FindFreeSlot();

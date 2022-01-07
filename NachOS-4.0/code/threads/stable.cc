@@ -24,7 +24,7 @@ STable::~STable()
     }
 }
 
-int STable::Create(char *name)
+int STable::Create(char *name, int semval)
 {
     for (int i = 0; i < MAX_SEMAPHORE; ++i)
     {
@@ -43,7 +43,7 @@ int STable::Create(char *name)
         return -1;
     }
 
-    semTab[id] = new Sem(name, id);
+    semTab[id] = new Sem(name, semval);
     return 0;
 }
 

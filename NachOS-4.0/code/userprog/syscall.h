@@ -46,6 +46,10 @@
 
 #define SC_CreateFile 50
 
+#define SC_CreateSemaphore 51
+#define SC_Up            52
+#define SC_Down          53
+
 #ifndef IN_ASM
 
 /* The system call interface.  These are the operations the Nachos
@@ -205,6 +209,10 @@ int ThreadJoin(ThreadId id);
 void ThreadExit(int ExitCode);	
 
 int CreateFile(char *name);
+
+int CreateSemaphore(char* name, int semval);
+int Up(char* name);
+int Down(char* name);
 
 #endif /* IN_ASM */
 

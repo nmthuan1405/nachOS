@@ -293,7 +293,7 @@ int SysCreateFile(int virtAddr){
 
 int SysExec(int virAddr)
 {
-	char* fileName = User2System(virAddr, 255);
+	char* fileName = User2System(virAddr, BUFFER_MAX_LENGTH);
     if (fileName == NULL){
         return -1;
     }
@@ -313,6 +313,36 @@ int SysExit(int ec){
 		kernel->currentThread->Finish();
 	}
 	return ec;
+}
+
+int SysCreateSemaphore(int virtAddr, int semval)
+{
+	char* name = User2System(virtAddr, BUFFER_MAX_LENGTH);
+	if (name == NULL || strlen(name) == 0){
+		return -1;
+	}
+
+	return kernel->semTab->Create(name, semval);
+}
+
+int SysUp(int virtAddr)
+{
+	char* name = User2System(virtAddr, BUFFER_MAX_LENGTH);
+	if (name == NULL || strlen(name) == 0){
+		return -1;
+	}
+
+	return kernel->semTab->Signal(name);
+}
+
+int SysDown(int virtAddr)
+{
+	char* name = User2System(virtAddr, BUFFER_MAX_LENGTH);
+	if (name == NULL || strlen(name) == 0){
+		return -1;
+	}
+
+	return kernel->semTab->Wait(name);
 }
 
 #endif /* ! __USERPROG_KSYSCALL_H__ */
