@@ -102,6 +102,9 @@ Kernel::Initialize()
     synchConsoleOut = new SynchConsoleOutput(consoleOut); // output to stdout
     synchDisk = new SynchDisk();    //
 
+    addrLock = new Semaphore("addrLock", 1);
+    gPhysPageBitMap = new Bitmap(256);
+    semTab = new STable();
     pTab = new PTable(10);
 
 #ifdef FILESYS_STUB
@@ -134,6 +137,9 @@ Kernel::~Kernel()
     delete postOfficeIn;
     delete postOfficeOut;
     
+    delete addrLock;
+    delete gPhysPageBitMap;
+    delete semTab;
     delete pTab;
     
     Exit(0);
