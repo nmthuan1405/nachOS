@@ -3,6 +3,8 @@
 #include "synch.h"
 #include "string.h"
 
+class Semaphore;
+
 class Sem
 {
 private:
@@ -10,30 +12,10 @@ private:
     Semaphore *sem;
 
 public:
-    // Tạo Semaphore để quản lý
-    // khởi tạo đối tượng Sem. Gán giá trị ban đầu là null
-    // nhớ khởi tạo bm sử dụng
-    Sem(char *na, int i)
-    {
-        strcpy(this->name, na);
-        sem = new Semaphore(name, i);
-    }
-    ~Sem()
-    {
-        // hủy các đối tượng đã tạo
-        delete sem;
-    }
-    void wait()
-    {
-        sem->P();
-    }
-    void signal()
-    {
-        sem->V();
-    }
-    char *GetName()
-    {
-        return name;
-    }
+    Sem(char *na, int i);
+    ~Sem();
+    void wait();
+    void signal();
+    char *GetName();
 };
 #endif
