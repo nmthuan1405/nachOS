@@ -1,14 +1,31 @@
 #include "PCB.h"
 
+PCB::PCB()
+{
+    joinsem = new Semaphore("joinsem", 0);
+    exitsem = new Semaphore("exitsem", 0);
+    multex = new Semaphore("multex", 1);
+
+    numwait = 0;
+    exitcode = 0;
+
+    // fileTable = new FILE[MAX_FILES];
+    thread = NULL;
+
+    parentID = 0;
+}
+
 PCB::PCB(int id)
 {
-    this->joinsem = new Semaphore("joinsem", 0);
-    this->exitsem = new Semaphore("exitsem", 0);
-    this->multex = new Semaphore("multex", 1);
+    joinsem = new Semaphore("joinsem", 0);
+    exitsem = new Semaphore("exitsem", 0);
+    multex = new Semaphore("multex", 1);
 
-    this->numwait = 0;
-    this->exitcode = 0;
-    this->thread = NULL;
+    numwait = 0;
+    exitcode = 0;
+
+    // fileTable = new FILE[MAX_FILES];
+    thread = NULL;
 
     if (id == 0)
     {
@@ -22,37 +39,26 @@ PCB::PCB(int id)
 
 PCB::~PCB()
 {
-    if(joinsem != NULL)
-		delete this->joinsem;
-	if(exitsem != NULL)
-		delete this->exitsem;
-	if(multex != NULL)
-		delete this->multex;
-	if(thread != NULL)
-	{		
-		thread->Finish();
+    if (joinsem != NULL)
+    {
+        delete joinsem;
+        joinsem = NULL;
+    }
+    if (exitsem != NULL)
+    {
+        delete exitsem;
+        exitsem = NULL;
+    }
+    if (multex != NULL)
+    {
+        delete multex;
+        multex = NULL;
+    }
+    if (thread != NULL)
+    {
+        thread->Finish();
         delete thread;
-	}
-}
-
-void PCB::JoinWait()
-{
-    joinsem->P();
-}
-
-void PCB::JoinRelease()
-{
-    joinsem->V();
-}
-
-void PCB::ExitWait()
-{
-    exitsem->P();
-}
-
-void PCB::ExitRelease()
-{
-    exitsem->V();
+    }
 }
 
 int PCB::Exec(char *filename, int id)
@@ -80,6 +86,73 @@ int PCB::Exec(char *filename, int id)
     multex->V();
     // Trả về id.
     return id;
+}
+
+int PCB::GetID()
+{
+    return thread->processID;
+}
+
+int PCB::GetNumWait()
+{
+    return numwait;
+}
+
+void PCB::JoinWait()
+{
+    joinsem->P();
+}
+
+void PCB::ExitWait()
+{
+    exitsem->P();
+}
+
+void PCB::JoinRelease()
+{
+    joinsem->V();
+}
+
+void PCB::ExitRelease()
+{
+    exitsem->V();
+}
+
+void PCB::IncNumWait()
+{
+    multex->P();
+    numwait++;
+    multex->V();
+}
+
+void PCB::DecNumWait()
+{
+    multex->P();
+    if (numwait > 0)
+    {
+        numwait--;
+    }
+    multex->V();
+}
+
+void PCB::SetExitCode(int ec)
+{
+    exitcode = ec;
+}
+
+int PCB::GetExitCode()
+{
+    return exitcode;
+}
+
+void PCB::SetFileName(char *fn)
+{
+    strcpy(thread->name, fn);
+}
+
+char* PCB::GetFileName()
+{
+    return thread->name;
 }
 
 void StartProcess_2(int id)
