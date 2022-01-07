@@ -1,11 +1,11 @@
 #ifndef STABLE_H
 #define STABLE_H
-#include "synch.h"
+#define MAX_SEMAPHORE 10
+#include "string.h"
 #include "bitmap.h"
 #include "sem.h"
-#define MAX_LOCK 10
-#define MAX_SEMAPHORE 10
 
+class Sem;
 class STable
 {
 private:
@@ -18,6 +18,6 @@ public:
     int Create(char *name);
     int Wait(char *name);
     int Signal(char *name);
-    int FindFreeSlot(int id);
+    int FindFreeSlot();
 };
 #endif
