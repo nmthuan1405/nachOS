@@ -3,9 +3,12 @@
 
 #include "bitmap.h"
 #include "PCB.h"
-#include "semaphore.h"
+#include "synch.h"
 
 #define MAX_PROCESS 10
+
+class PCB;
+class Semaphore;
 
 class PTable{
     private:
