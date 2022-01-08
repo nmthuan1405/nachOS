@@ -9,7 +9,11 @@ PCB::PCB()
     numwait = 0;
     exitcode = 0;
 
-    // fileTable = new FILE[MAX_FILES];
+    fileTable = new FILE *[MAX_FILE];
+    filemap = new Bitmap(MAX_FILE);
+    filemap->Mark(0);
+    filemap->Mark(1);
+
     thread = NULL;
 
     parentID = 0;
@@ -24,7 +28,11 @@ PCB::PCB(int id)
     numwait = 0;
     exitcode = 0;
 
-    // fileTable = new FILE[MAX_FILES];
+    fileTable = new FILE *[MAX_FILE];
+    filemap = new Bitmap(MAX_FILE);
+    filemap->Mark(0);
+    filemap->Mark(1);
+
     thread = NULL;
 
     if (id == 0)
@@ -56,8 +64,19 @@ PCB::~PCB()
     }
     if (thread != NULL)
     {
+        thread->FreeSpace();
         thread->Finish();
-        delete thread;
+        // delete thread;
+    }
+    if (fileTable != NULL)
+    {
+        delete[] fileTable;
+        fileTable = NULL;
+    }
+    if (filemap != NULL)
+    {
+        delete filemap;
+        filemap = NULL;
     }
 }
 
@@ -150,7 +169,7 @@ void PCB::SetFileName(char *fn)
     strcpy(thread->name, fn);
 }
 
-char* PCB::GetFileName()
+char *PCB::GetFileName()
 {
     return thread->name;
 }
@@ -161,7 +180,7 @@ void StartProcess_2(int id)
     char *fileName = kernel->pTab->GetFileName(id);
 
     AddrSpace *space;
-    space = new AddrSpace(fileName);
+    space = new AddrSpace();
 
     if (space == NULL)
     {
@@ -169,13 +188,9 @@ void StartProcess_2(int id)
         return;
     }
 
-    kernel->currentThread->space = space;
-
-    space->InitRegisters(); // set the initial register values
-    space->RestoreState();  // load page table register
-
-    kernel->machine->Run(); // jump to the user progam
-    ASSERT(FALSE);          // machine->Run never returns;
-                            // the address space exits
-                            // by doing the syscall "exit"
+    if (space->Load(fileName))
+    {                       // load the program into the space
+        space->Execute();   // run the program
+        ASSERTNOTREACHED(); // Execute never returns
+    }
 }

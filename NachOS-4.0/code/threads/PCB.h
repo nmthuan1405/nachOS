@@ -13,12 +13,14 @@ private:
     Semaphore *multex;  // semaphore for exclusive access
     int exitcode;
     int numwait; // number of process joined
-
-    // FILE* fileTable;
+    
     Thread *thread;
 
 public:
     int parentID;
+
+    FILE** fileTable;
+    Bitmap* filemap;
 
 public:
     PCB();

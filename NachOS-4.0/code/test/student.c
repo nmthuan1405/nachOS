@@ -1,4 +1,5 @@
 #include "syscall.h"
+#include "FileTable.h"
 
 void getWater(){
     for (int i = 0; i < 1000; i++){
