@@ -243,6 +243,14 @@ CreateFile:
 	syscall
 	j	$31
 	.end CreateFile
+
+	.globl GetCurrentProcessId
+	.ent	GetCurrentProcessId
+GetCurrentProcessId:
+	addiu $2,$0,SC_GetCurrentProcessId
+	syscall
+	j	$31
+	.end GetCurrentProcessId
 		
 /* dummy function to keep gcc happy */
         .globl  __main

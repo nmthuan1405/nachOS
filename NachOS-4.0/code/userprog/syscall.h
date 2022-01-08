@@ -50,6 +50,8 @@
 #define SC_Up            52
 #define SC_Down          53
 
+#define SC_GetCurrentProcessId 60
+
 #ifndef IN_ASM
 
 /* The system call interface.  These are the operations the Nachos
@@ -153,7 +155,7 @@ int Remove(char *name);
 /* Open the Nachos file "name", and return an "OpenFileId" that can 
  * be used to read and write to the file.
  */
-OpenFileId Open(char *name);
+OpenFileId Open(char *name, int type);
 
 /* Write "size" bytes from "buffer" to the open file. 
  * Return the number of bytes actually read on success.
@@ -213,6 +215,8 @@ int CreateFile(char *name);
 int CreateSemaphore(char* name, int semval);
 int Up(char* name);
 int Down(char* name);
+
+int GetCurrentProcessId();
 
 #endif /* IN_ASM */
 

@@ -345,4 +345,8 @@ int SysDown(int virtAddr)
 	return kernel->semTab->Wait(name);
 }
 
+int SysGetCurrentProcessId(){
+	return kernel->currentThread->processID;
+}
+
 #endif /* ! __USERPROG_KSYSCALL_H__ */
