@@ -170,3 +170,8 @@ char *PTable::GetFileName(int id)
 {
     pcb[id]->GetFileName();
 }
+
+PCB* PTable::getCurrentPCB()
+{
+    return pcb[kernel->currentThread->processID];
+}

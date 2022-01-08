@@ -14,6 +14,7 @@
 #include "kernel.h"
 #include "synchconsole.h"
 #include "filesys.h"
+#include "PCB.h"
 
 #define BUFFER_MAX_LENGTH 255
 #define FILE_MAX_LENGTH 32
@@ -289,6 +290,85 @@ int SysCreateFile(int virtAddr){
 	printf("Create file successfully!");
 	delete[] name;
 	return 0;
+}
+
+int SysOpen(int virAddr, int type)
+{
+	char* name = User2System(virAddr, BUFFER_MAX_LENGTH);
+    if (type != 0 && type != 1)
+        return -1;
+
+	PCB* curr = kernel->pTab->getCurrentPCB();
+	int id = curr->filemap->FindAndSet();
+	if (id == -1){
+		printf("Not enough file descriptors!");
+		return -1;
+	}
+
+	FILE* f = fopen(name, type==0?"rb":"rb+");
+	if (f == NULL){
+		printf("File does not exist!");
+		curr->filemap->Clear(id);
+		return -1;
+	}
+	
+	curr->fileTable[id] = f;
+	return id;
+}
+
+int SysClose(int id){
+    if (id <= 1 || id >= 10)
+        return -1;
+
+	PCB* curr = kernel->pTab->getCurrentPCB();
+	if (!curr->filemap->Test(id)){
+		printf("File descriptor does not exist!");
+		return -1;
+	}
+
+	curr->filemap->Clear(id);
+	fclose(curr->fileTable[id]);
+	curr->fileTable[id] = NULL;
+	return 0;
+}
+
+int SysRead(int virAddr, int charcount, int id)
+{
+	if (id == 1)
+	{
+		SysReadString((char*) virAddr, charcount);
+		return -1;
+	}
+
+	PCB* curr = kernel->pTab->getCurrentPCB();
+	if (!curr->filemap->Test(id)){
+		printf("File descriptor does not exist!");
+		return -1;
+	}
+
+	char* buffer = new char[charcount + 1];
+	int count = fread(buffer, 1, charcount, curr->fileTable[id]);
+
+	System2User((int)virAddr, charcount, buffer);
+	return count;
+}
+
+int SysWrite(int virAddr, int charcount, int id)
+{
+	if (id == 0) {
+		SysPrintString(virAddr);
+		return -1;
+	}
+
+	PCB* curr = kernel->pTab->getCurrentPCB();
+	if (!curr->filemap->Test(id)){
+		printf("File descriptor does not exist!");
+		return -1;
+	}
+
+	char* string = User2System(virAddr, charcount);
+	int count = fwrite(string, 1, charcount, curr->fileTable[id]);
+	return count;
 }
 
 int SysExec(int virAddr)
