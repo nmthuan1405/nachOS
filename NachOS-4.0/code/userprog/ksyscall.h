@@ -208,11 +208,11 @@ int SysRandomNum()
 int SysReadString(char *virtAddr, int length)
 {
 	if (length < 0) // invalid length
-		return;
+		return -1;
 
 	char *buffer = new char[length + 1];
 	if (buffer == NULL) // cannot allocate
-		return;
+		return -1;
 
 	// get char from console and put into buffer
 	int i = -1;
@@ -240,7 +240,7 @@ int SysPrintString(int virtAddr)
 
 	// return if system does not have enough memory
 	if (sysBuffer == NULL)
-		return;
+		return -1;
 
 	// print each character in buffer to console
 	int index = 0;
@@ -264,7 +264,7 @@ int SysPrintString(int virtAddr)
 
 			// return if system does not have enough memory
 			if (sysBuffer == NULL)
-				return;
+				return count;
 
 			// reset index from 0
 			index = 0;
@@ -376,7 +376,7 @@ int SysRead(int virAddr, int charcount, int id)
 	}
 
 	int count = fread(buffer, 1, charcount, curr->fileTable[id]);
-	if (feof(curr->fileTable[id]))
+	if (count == 0)
 	{
 		printf("End of file!");
 		delete[] buffer;
