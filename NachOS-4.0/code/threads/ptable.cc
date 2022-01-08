@@ -12,7 +12,7 @@ PTable::PTable(int size)
     }
 
     bm->Mark(0);
-    pcb[0] = new PCB(0);
+    pcb[0] = new PCB();
     pcb[0]->parentID = -1;
 }
 
@@ -21,11 +21,13 @@ PTable::~PTable()
     if (bm != NULL)
     {
         delete bm;
+        bm = NULL;
     }
 
     if (bmsem != NULL)
     {
         delete bmsem;
+        bmsem = NULL;
     }
 
     for (int i = 0; i < MAX_PROCESS; i++)
@@ -33,6 +35,7 @@ PTable::~PTable()
         if (pcb[i] != NULL)
         {
             delete pcb[i];
+            pcb[i] = NULL;
         }
     }
 }
@@ -74,8 +77,7 @@ int PTable::ExecUpdate(char *name)
     }
 
     // Nếu có slot trống thì khởi tạo một PCB mới với processID chính là index của slot này, parrentID là processID của currentThread.
-    pcb[index] = new PCB(index);
-    // pcb[index]->SetFileName(name);
+    pcb[index] = new PCB();
     pcb[index]->parentID = kernel->currentThread->processID;
 
     // Gọi thực thi phương thức Exec của lớp PCB
@@ -120,7 +122,7 @@ int PTable::ExitUpdate(int ec)
 int PTable::JoinUpdate(int id)
 {
     // Kiem tra tinh hop le cua id
-    if (id < 0 || id > 9)
+    if (id < 0 || id >= MAX_PROCESS)
     {
         printf("Invalid ID\n");
         return -1;
@@ -163,6 +165,7 @@ void PTable::Remove(int pid)
     if (pcb[pid] != NULL)
     {
         delete pcb[pid];
+        pcb[pid] = NULL;
     }
 }
 
@@ -171,7 +174,7 @@ char *PTable::GetFileName(int id)
     pcb[id]->GetFileName();
 }
 
-PCB* PTable::getCurrentPCB()
+PCB *PTable::getCurrentPCB()
 {
     return pcb[kernel->currentThread->processID];
 }

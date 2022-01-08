@@ -9,7 +9,11 @@ Sem::Sem(char *na, int i)
 Sem::~Sem()
 {
     // hủy các đối tượng đã tạo
-    delete sem;
+    if (sem != NULL)
+    {
+        delete sem;
+        sem = NULL;
+    }
 }
 
 void Sem::wait()
