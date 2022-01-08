@@ -50,13 +50,6 @@ PCB::~PCB()
         delete filemap;
         filemap = NULL;
     }
-
-    if (thread != NULL)
-    {
-        thread->FreeSpace();
-        thread->Finish();
-        delete thread;
-    }
 }
 
 int PCB::Exec(char *filename, int id)
