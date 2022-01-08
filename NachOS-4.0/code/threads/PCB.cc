@@ -9,7 +9,7 @@ PCB::PCB()
     numwait = 0;
     exitcode = 0;
 
-    fileTable = new FILE*[MAX_FILE];
+    fileTable = new FILE *[MAX_FILE];
     filemap = new Bitmap(MAX_FILE);
     filemap->Mark(0);
     filemap->Mark(1);
@@ -28,7 +28,7 @@ PCB::PCB(int id)
     numwait = 0;
     exitcode = 0;
 
-    fileTable = new FILE*[MAX_FILE];
+    fileTable = new FILE *[MAX_FILE];
     filemap = new Bitmap(MAX_FILE);
     filemap->Mark(0);
     filemap->Mark(1);
@@ -82,8 +82,6 @@ PCB::~PCB()
 
 int PCB::Exec(char *filename, int id)
 {
-    int* idx = new int;
-    *idx = id;
     // Gọi mutex->P(); để giúp tránh tình trạng nạp 2 tiến trình cùng 1 lúc.
     multex->P();
 
@@ -102,7 +100,7 @@ int PCB::Exec(char *filename, int id)
     // Đặt parrentID của thread này là processID của thread gọi thực thi Exec
     this->parentID = kernel->currentThread->processID;
     // Gọi thực thi Fork(StartProcess_2,id) => Ta cast thread thành kiểu int, sau đó khi xử ký hàm StartProcess ta cast Thread về đúng kiểu của nó.
-    this->thread->Fork((VoidFunctionPtr)StartProcess_2, (void*) id);
+    this->thread->Fork((VoidFunctionPtr)StartProcess_2, (void *)id);
 
     multex->V();
     // Trả về id.
@@ -171,19 +169,18 @@ void PCB::SetFileName(char *fn)
     strcpy(thread->name, fn);
 }
 
-char* PCB::GetFileName()
+char *PCB::GetFileName()
 {
     return thread->name;
 }
 
 void StartProcess_2(int id)
 {
-    cout << "StartProcess_2 " << id << endl;
     // Lay fileName cua process id nay
     char *fileName = kernel->pTab->GetFileName(id);
 
     AddrSpace *space;
-    space = new AddrSpace(fileName);
+    space = new AddrSpace();
 
     if (space == NULL)
     {
@@ -191,13 +188,9 @@ void StartProcess_2(int id)
         return;
     }
 
-    kernel->currentThread->space = space;
-
-    space->InitRegisters(); // set the initial register values
-    space->RestoreState();  // load page table register
-
-    kernel->machine->Run(); // jump to the user progam
-    ASSERT(FALSE);          // machine->Run never returns;
-                            // the address space exits
-                            // by doing the syscall "exit"
+    if (space->Load(fileName))
+    {                       // load the program into the space
+        space->Execute();   // run the program
+        ASSERTNOTREACHED(); // Execute never returns
+    }
 }
