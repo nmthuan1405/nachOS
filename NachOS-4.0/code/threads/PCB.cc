@@ -64,8 +64,9 @@ PCB::~PCB()
     }
     if (thread != NULL)
     {
+        thread->FreeSpace();
         thread->Finish();
-        delete thread;
+        // delete thread;
     }
     if (fileTable != NULL)
     {

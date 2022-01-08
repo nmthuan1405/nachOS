@@ -437,7 +437,7 @@ int SysExit(int ec)
 	if (ec == 0)
 	{
 		ec = kernel->pTab->ExitUpdate(ec);
-		//kernel->currentThread->FreeSpace();
+		kernel->currentThread->FreeSpace();
 		kernel->currentThread->Finish();
 	}
 	return ec;
