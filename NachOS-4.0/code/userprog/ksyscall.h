@@ -110,7 +110,7 @@ int SysReadNum()
 			{
 				res *= 10;
 				res += sign * (c - '0');
-				if ((sign > 0 && res < 0) || (sign < 0 && res > 0))  // overflow
+				if ((sign > 0 && res < 0) || (sign < 0 && res > 0)) // overflow
 					isValid = false;
 			}
 			else
@@ -158,7 +158,7 @@ void SysPrintNum(int number)
 	}
 
 	// print digits array to console in reverse order
-	if(number > 0)
+	if (number > 0)
 	{
 		for (int i = 0; i < digitCount; i++)
 		{
@@ -205,12 +205,12 @@ int SysRandomNum()
 			 - max length of string
     Output:  - None
     Purpose: Read a string from console and store at provided address */
-void SysReadString(char *virtAddr, int length)
+int SysReadString(char *virtAddr, int length)
 {
 	if (length < 0) // invalid length
 		return;
 
-	char *buffer = new char[length + 1]; 
+	char *buffer = new char[length + 1];
 	if (buffer == NULL) // cannot allocate
 		return;
 
@@ -224,15 +224,16 @@ void SysReadString(char *virtAddr, int length)
 		else
 			break;
 	}
-	buffer[i + 1] = 0; // mark end of string
+	buffer[i + 1] = 0;							// mark end of string
 	System2User((int)virtAddr, length, buffer); // copy to user memory
 	delete[] buffer;
+	return i + 1;
 }
 
 /*	Input: Address of buffer stores string in user space
 	Output: None
 	Purpose: Print a string to console */
-void SysPrintString(int virtAddr)
+int SysPrintString(int virtAddr)
 {
 	// copy buffer from user memory space to system memory space
 	char *sysBuffer = User2System(virtAddr, BUFFER_MAX_LENGTH);
@@ -243,10 +244,12 @@ void SysPrintString(int virtAddr)
 
 	// print each character in buffer to console
 	int index = 0;
+	int count = 0;
 	while (sysBuffer[index] != 0)
 	{
 		kernel->synchConsoleOut->PutChar(sysBuffer[index]);
 		index++;
+		count++;
 
 		// if system buffer is full but the string is not ended
 		if (index == BUFFER_MAX_LENGTH)
@@ -269,20 +272,25 @@ void SysPrintString(int virtAddr)
 	}
 	// de-allocate system buffer
 	delete[] sysBuffer;
+	return count;
 }
 
-int SysCreateFile(int virtAddr){
-	char* name = User2System(virtAddr, FILE_MAX_LENGTH + 1);
-	if (strlen(name) == 0){
+int SysCreateFile(int virtAddr)
+{
+	char *name = User2System(virtAddr, FILE_MAX_LENGTH + 1);
+	if (strlen(name) == 0)
+	{
 		printf("Invalid file name!");
 		return -1;
 	}
-	if (name == NULL){
+	if (name == NULL)
+	{
 		printf("Not enough system memory!");
 		delete[] name;
 		return -1;
 	}
-	if (!kernel->fileSystem->Create(name, 0)){
+	if (!kernel->fileSystem->Create(name, 0))
+	{
 		printf("Create file unsuccessfully!");
 		delete[] name;
 		return -1;
@@ -294,34 +302,47 @@ int SysCreateFile(int virtAddr){
 
 int SysOpen(int virAddr, int type)
 {
-	char* name = User2System(virAddr, BUFFER_MAX_LENGTH);
-    if (type != 0 && type != 1)
-        return -1;
+	if (type != 0 && type != 1)
+		return -1;
 
-	PCB* curr = kernel->pTab->getCurrentPCB();
-	int id = curr->filemap->FindAndSet();
-	if (id == -1){
-		printf("Not enough file descriptors!");
+	char *name = User2System(virAddr, BUFFER_MAX_LENGTH);
+	if (name == NULL || strlen(name) == 0)
+	{
+		printf("Invalid file name!");
 		return -1;
 	}
 
-	FILE* f = fopen(name, type==0?"rb":"rb+");
-	if (f == NULL){
+	PCB *curr = kernel->pTab->getCurrentPCB();
+	int id = curr->filemap->FindAndSet();
+	if (id == -1)
+	{
+		printf("Not enough file descriptor!");
+		delete[] name;
+		return -1;
+	}
+
+	FILE *f = fopen(name, type == 0 ? "rb+" : "rb");
+	if (f == NULL)
+	{
 		printf("File does not exist!");
 		curr->filemap->Clear(id);
+		delete[] name;
 		return -1;
 	}
-	
+
 	curr->fileTable[id] = f;
+	delete[] name;
 	return id;
 }
 
-int SysClose(int id){
-    if (id <= 1 || id >= 10)
-        return -1;
+int SysClose(int id)
+{
+	if (id <= 1 || id >= MAX_FILE)
+		return -1;
 
-	PCB* curr = kernel->pTab->getCurrentPCB();
-	if (!curr->filemap->Test(id)){
+	PCB *curr = kernel->pTab->getCurrentPCB();
+	if (!curr->filemap->Test(id))
+	{
 		printf("File descriptor does not exist!");
 		return -1;
 	}
@@ -334,60 +355,87 @@ int SysClose(int id){
 
 int SysRead(int virAddr, int charcount, int id)
 {
-	if (id == 1)
-	{
-		SysReadString((char*) virAddr, charcount);
+	if (id == 0)
+		return SysReadString((char *)virAddr, charcount);
+		
+	if (charcount < 0 || id <= 1 || id >= MAX_FILE)
 		return -1;
-	}
 
-	PCB* curr = kernel->pTab->getCurrentPCB();
-	if (!curr->filemap->Test(id)){
+	PCB *curr = kernel->pTab->getCurrentPCB();
+	if (!curr->filemap->Test(id))
+	{
 		printf("File descriptor does not exist!");
 		return -1;
 	}
 
-	char* buffer = new char[charcount + 1];
-	int count = fread(buffer, 1, charcount, curr->fileTable[id]);
+	char *buffer = new char[charcount + 1];
+	if (buffer == NULL)
+	{
+		printf("Not enough system memory!");
+		return -1;
+	}
 
-	System2User((int)virAddr, charcount, buffer);
+	int count = fread(buffer, 1, charcount, curr->fileTable[id]);
+	if (feof(curr->fileTable[id]))
+	{
+		printf("End of file!");
+		delete[] buffer;
+		return -2;
+	}
+
+	System2User((int)virAddr, count, buffer);
+	delete[] buffer;
 	return count;
 }
 
 int SysWrite(int virAddr, int charcount, int id)
 {
-	if (id == 0) {
-		SysPrintString(virAddr);
-		return -1;
-	}
+	if (id == 1)
+		return SysPrintString(virAddr);
 
-	PCB* curr = kernel->pTab->getCurrentPCB();
-	if (!curr->filemap->Test(id)){
+	if (charcount < 0 || id <= 1 || id >= MAX_FILE)
+		return -1;
+
+	PCB *curr = kernel->pTab->getCurrentPCB();
+	if (!curr->filemap->Test(id))
+	{
 		printf("File descriptor does not exist!");
 		return -1;
 	}
 
-	char* string = User2System(virAddr, charcount);
+	char *string = User2System(virAddr, charcount);
+	if (string == NULL)
+	{
+		printf("Not enough system memory!");
+		return -1;
+	}
+
 	int count = fwrite(string, 1, charcount, curr->fileTable[id]);
+	delete[] string;
 	return count;
 }
 
 int SysExec(int virAddr)
 {
-	char* fileName = User2System(virAddr, BUFFER_MAX_LENGTH);
-    if (fileName == NULL){
-        return -1;
-    }
+	char *fileName = User2System(virAddr, BUFFER_MAX_LENGTH);
+	if (fileName == NULL)
+	{
+		return -1;
+	}
 
-    int pid = kernel->pTab->ExecUpdate(fileName);
-    return pid;
+	int pid = kernel->pTab->ExecUpdate(fileName);
+	return pid;
 }
 
-int SysJoin(int id){
+int SysJoin(int id)
+{
 	return kernel->pTab->JoinUpdate(id);
 }
 
-int SysExit(int ec){
-	if (ec == 0){
+int SysExit(int ec)
+{
+	if (ec == 0)
+	{
 		ec = kernel->pTab->ExitUpdate(ec);
 		//kernel->currentThread->FreeSpace();
 		kernel->currentThread->Finish();
@@ -397,8 +445,9 @@ int SysExit(int ec){
 
 int SysCreateSemaphore(int virtAddr, int semval)
 {
-	char* name = User2System(virtAddr, BUFFER_MAX_LENGTH);
-	if (name == NULL || strlen(name) == 0){
+	char *name = User2System(virtAddr, BUFFER_MAX_LENGTH);
+	if (name == NULL || strlen(name) == 0)
+	{
 		return -1;
 	}
 
@@ -407,8 +456,9 @@ int SysCreateSemaphore(int virtAddr, int semval)
 
 int SysUp(int virtAddr)
 {
-	char* name = User2System(virtAddr, BUFFER_MAX_LENGTH);
-	if (name == NULL || strlen(name) == 0){
+	char *name = User2System(virtAddr, BUFFER_MAX_LENGTH);
+	if (name == NULL || strlen(name) == 0)
+	{
 		return -1;
 	}
 
@@ -417,8 +467,9 @@ int SysUp(int virtAddr)
 
 int SysDown(int virtAddr)
 {
-	char* name = User2System(virtAddr, BUFFER_MAX_LENGTH);
-	if (name == NULL || strlen(name) == 0){
+	char *name = User2System(virtAddr, BUFFER_MAX_LENGTH);
+	if (name == NULL || strlen(name) == 0)
+	{
 		return -1;
 	}
 

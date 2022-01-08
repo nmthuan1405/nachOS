@@ -101,7 +101,7 @@ int PCB::Exec(char *filename, int id)
     // Đặt parrentID của thread này là processID của thread gọi thực thi Exec
     this->parentID = kernel->currentThread->processID;
     // Gọi thực thi Fork(StartProcess_2,id) => Ta cast thread thành kiểu int, sau đó khi xử ký hàm StartProcess ta cast Thread về đúng kiểu của nó.
-    this->thread->Fork((VoidFunctionPtr)StartProcess_2, (void *)idx);
+    this->thread->Fork((VoidFunctionPtr)StartProcess_2, (void*) id);
 
     multex->V();
     // Trả về id.
@@ -177,6 +177,7 @@ char* PCB::GetFileName()
 
 void StartProcess_2(int id)
 {
+    cout << "StartProcess_2 " << id << endl;
     // Lay fileName cua process id nay
     char *fileName = kernel->pTab->GetFileName(id);
 
