@@ -321,7 +321,7 @@ int SysOpen(int virAddr, int type)
 		return -1;
 	}
 
-	FILE *f = fopen(name, type == 0 ? "rb+" : "rb");
+	FILE *f = fopen(name, type == 0 ? "ab+" : "rb");
 	if (f == NULL)
 	{
 		printf("File does not exist!");
