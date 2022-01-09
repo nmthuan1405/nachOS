@@ -112,7 +112,7 @@ ifeq ($(hosttype),unknown)
 PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
-PROGRAMS = add halt shell matmult segments numTest charTest stringTest help sort ascii 
+PROGRAMS = add halt shell matmult segments numTest charTest stringTest help sort ascii fileTest ping pong pingpong student mainTest 
 endif
 
 all: $(PROGRAMS)
@@ -186,6 +186,42 @@ ascii.o: ascii.c
 ascii: ascii.o start.o
 	$(LD) $(LDFLAGS) start.o ascii.o -o ascii.coff
 	$(COFF2NOFF) ascii.coff ascii
+
+fileTest.o: fileTest.c
+	$(CC) $(CFLAGS) -c fileTest.c
+fileTest: fileTest.o start.o
+	$(LD) $(LDFLAGS) start.o fileTest.o -o fileTest.coff
+	$(COFF2NOFF) fileTest.coff fileTest
+
+ping.o: ping.c
+	$(CC) $(CFLAGS) -c ping.c
+ping: ping.o start.o
+	$(LD) $(LDFLAGS) start.o ping.o -o ping.coff
+	$(COFF2NOFF) ping.coff ping
+
+pong.o: pong.c
+	$(CC) $(CFLAGS) -c pong.c
+pong: pong.o start.o
+	$(LD) $(LDFLAGS) start.o pong.o -o pong.coff
+	$(COFF2NOFF) pong.coff pong
+
+pingpong.o: pingpong.c
+	$(CC) $(CFLAGS) -c pingpong.c
+pingpong: pingpong.o start.o
+	$(LD) $(LDFLAGS) start.o pingpong.o -o pingpong.coff
+	$(COFF2NOFF) pingpong.coff pingpong
+
+student.o: student.c
+	$(CC) $(CFLAGS) -c student.c
+student: student.o start.o
+	$(LD) $(LDFLAGS) start.o student.o -o student.coff
+	$(COFF2NOFF) student.coff student
+
+mainTest.o: mainTest.c
+	$(CC) $(CFLAGS) -c mainTest.c
+mainTest: mainTest.o start.o
+	$(LD) $(LDFLAGS) start.o mainTest.o -o mainTest.coff
+	$(COFF2NOFF) mainTest.coff mainTest
 
 clean:
 	$(RM) -f *.o *.ii

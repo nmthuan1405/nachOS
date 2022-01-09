@@ -44,7 +44,7 @@ class FileSystem {
   public:
     FileSystem() {}
 
-    bool Create(char *name) {
+    bool Create(char *name, int initialSize) {
 	int fileDescriptor = OpenForWrite(name);
 
 	if (fileDescriptor == -1) return FALSE;

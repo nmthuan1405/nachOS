@@ -13,8 +13,11 @@
 
 #include "kernel.h"
 #include "synchconsole.h"
+#include "filesys.h"
+#include "PCB.h"
 
 #define BUFFER_MAX_LENGTH 255
+#define FILE_MAX_LENGTH 32
 
 /*  Input:  - User space address (int)        
             - Limit of buffer (int) 
@@ -107,7 +110,7 @@ int SysReadNum()
 			{
 				res *= 10;
 				res += sign * (c - '0');
-				if ((sign > 0 && res < 0) || (sign < 0 && res > 0))  // overflow
+				if ((sign > 0 && res < 0) || (sign < 0 && res > 0)) // overflow
 					isValid = false;
 			}
 			else
@@ -155,7 +158,7 @@ void SysPrintNum(int number)
 	}
 
 	// print digits array to console in reverse order
-	if(number > 0)
+	if (number > 0)
 	{
 		for (int i = 0; i < digitCount; i++)
 		{
@@ -202,14 +205,14 @@ int SysRandomNum()
 			 - max length of string
     Output:  - None
     Purpose: Read a string from console and store at provided address */
-void SysReadString(char *virtAddr, int length)
+int SysReadString(char *virtAddr, int length)
 {
 	if (length < 0) // invalid length
-		return;
+		return -1;
 
-	char *buffer = new char[length + 1]; 
+	char *buffer = new char[length + 1];
 	if (buffer == NULL) // cannot allocate
-		return;
+		return -1;
 
 	// get char from console and put into buffer
 	int i = -1;
@@ -221,29 +224,32 @@ void SysReadString(char *virtAddr, int length)
 		else
 			break;
 	}
-	buffer[i + 1] = 0; // mark end of string
+	buffer[i + 1] = 0;							// mark end of string
 	System2User((int)virtAddr, length, buffer); // copy to user memory
 	delete[] buffer;
+	return i + 1;
 }
 
 /*	Input: Address of buffer stores string in user space
 	Output: None
 	Purpose: Print a string to console */
-void SysPrintString(int virtAddr)
+int SysPrintString(int virtAddr)
 {
 	// copy buffer from user memory space to system memory space
 	char *sysBuffer = User2System(virtAddr, BUFFER_MAX_LENGTH);
 
 	// return if system does not have enough memory
 	if (sysBuffer == NULL)
-		return;
+		return -1;
 
 	// print each character in buffer to console
 	int index = 0;
+	int count = 0;
 	while (sysBuffer[index] != 0)
 	{
 		kernel->synchConsoleOut->PutChar(sysBuffer[index]);
 		index++;
+		count++;
 
 		// if system buffer is full but the string is not ended
 		if (index == BUFFER_MAX_LENGTH)
@@ -258,7 +264,7 @@ void SysPrintString(int virtAddr)
 
 			// return if system does not have enough memory
 			if (sysBuffer == NULL)
-				return;
+				return count;
 
 			// reset index from 0
 			index = 0;
@@ -266,6 +272,252 @@ void SysPrintString(int virtAddr)
 	}
 	// de-allocate system buffer
 	delete[] sysBuffer;
+	return count;
+}
+
+/*	Input: Address of buffer stores file name in user space
+	Output: 0 if successful, otherwise -1
+	Purpose: Create an empty file */
+int SysCreateFile(int virtAddr)
+{
+	char *name = User2System(virtAddr, FILE_MAX_LENGTH + 1);
+	if (strlen(name) == 0)
+	{
+		DEBUG(dbgSys, "Invalid file name!");
+		return -1;
+	}
+	if (name == NULL)
+	{
+		DEBUG(dbgSys, "Not enough system memory!");
+		delete[] name;
+		return -1;
+	}
+	if (!kernel->fileSystem->Create(name, 0))
+	{
+		DEBUG(dbgSys, "Create file unsuccessfully!");
+		delete[] name;
+		return -1;
+	}
+	DEBUG(dbgSys, "Create file successfully!");
+	delete[] name;
+	return 0;
+}
+
+/*	Input: 	Address of buffer stores file name in user space
+			Type 0 for read and write mode, 1 for read only mode
+	Output: 0 if successful, otherwise -1
+	Purpose: Open a file */
+int SysOpen(int virAddr, int type)
+{
+	if (type != 0 && type != 1){
+		DEBUG(dbgSys, "Invalid type!");
+		return -1;
+	}
+
+	char *name = User2System(virAddr, BUFFER_MAX_LENGTH);
+	if (name == NULL || strlen(name) == 0)
+	{
+		DEBUG(dbgSys, "Invalid file name!");
+		return -1;
+	}
+
+	PCB *curr = kernel->pTab->getCurrentPCB();
+	int id = curr->filemap->FindAndSet();
+	if (id == -1)
+	{
+		DEBUG(dbgSys, "Not enough file descriptor!");
+		delete[] name;
+		return -1;
+	}
+
+	FILE *f = fopen(name, type == 0 ? "ab+" : "rb");
+	if (f == NULL)
+	{
+		DEBUG(dbgSys, "File does not exist!");
+		curr->filemap->Clear(id);
+		delete[] name;
+		return -1;
+	}
+
+	curr->fileTable[id] = f;
+	delete[] name;
+	return id;
+}
+
+/*	Input: File's ID in file table
+	Output: 0 if successful, otherwise -1
+	Purpose: Close a file */
+int SysClose(int id)
+{
+	if (id <= 1 || id >= MAX_FILE)
+		return -1;
+
+	PCB *curr = kernel->pTab->getCurrentPCB();
+	if (!curr->filemap->Test(id))
+	{
+		DEBUG(dbgSys, "File descriptor does not exist!");
+		return -1;
+	}
+
+	curr->filemap->Clear(id);
+	fclose(curr->fileTable[id]);
+	curr->fileTable[id] = NULL;
+	return 0;
+}
+
+/*	Input: 	Address store the buffer in user mode
+			Maximum number of characters read
+			ID of file read
+	Output: Actual number of characters read
+	Purpose: Read from a file or console */
+int SysRead(int virAddr, int charcount, int id)
+{
+	if (id == 0)
+		return SysReadString((char *)virAddr, charcount);
+		
+	if (charcount < 0 || id <= 1 || id >= MAX_FILE)
+		return -1;
+
+	PCB *curr = kernel->pTab->getCurrentPCB();
+	if (!curr->filemap->Test(id))
+	{
+		DEBUG(dbgSys, "File descriptor does not exist!");
+		return -1;
+	}
+
+	char *buffer = new char[charcount + 1];
+	if (buffer == NULL)
+	{
+		DEBUG(dbgSys, "Not enough system memory!");
+		return -1;
+	}
+
+	int count = fread(buffer, 1, charcount, curr->fileTable[id]);
+	if (count == 0)
+	{
+		DEBUG(dbgSys, "End of file!");
+		delete[] buffer;
+		return -2;
+	}
+
+	System2User((int)virAddr, count, buffer);
+	delete[] buffer;
+	return count;
+}
+
+/*	Input: 	Address store the buffer in user mode
+			Maximum number of characters written
+			ID of file read
+	Output: Actual number of characters written
+	Purpose: Write to a file or console */
+int SysWrite(int virAddr, int charcount, int id)
+{
+	if (id == 1)
+		return SysPrintString(virAddr);
+
+	if (charcount < 0 || id <= 1 || id >= MAX_FILE)
+		return -1;
+
+	PCB *curr = kernel->pTab->getCurrentPCB();
+	if (!curr->filemap->Test(id))
+	{
+		DEBUG(dbgSys, "File descriptor does not exist!");
+		return -1;
+	}
+
+	char *string = User2System(virAddr, charcount);
+	if (string == NULL)
+	{
+		DEBUG(dbgSys, "Not enough system memory!");
+		return -1;
+	}
+
+	int count = fwrite(string, 1, charcount, curr->fileTable[id]);
+	delete[] string;
+	return count;
+}
+
+/*	Input: 	Address store program's name in user mode
+	Output: Program's ID or -1 if unsuccessful
+	Purpose: Execute a program in a new thread */
+int SysExec(int virAddr)
+{
+	char *fileName = User2System(virAddr, BUFFER_MAX_LENGTH);
+	if (fileName == NULL)
+	{
+		return -1;
+	}
+
+	int pid = kernel->pTab->ExecUpdate(fileName);
+	return pid;
+}
+
+/*	Input: 	ID of program 
+	Output: exitcode = 0 if successul, otherwise -1 or error code
+	Purpose: Wait and block a process */
+int SysJoin(int id)
+{
+	return kernel->pTab->JoinUpdate(id);
+}
+
+/*	Input: 	Exitcode of joined program
+	Output: None
+	Purpose: Exit the joined process */
+void SysExit(int ec)
+{
+	ec = kernel->pTab->ExitUpdate(ec);
+	kernel->currentThread->FreeSpace();
+	kernel->currentThread->Finish();
+}
+
+/*	Input: 	Address store semaphore's name in user mode
+			Value of semaphore
+	Output: 0 if successful, otherwise -1
+	Purpose: create a semaphore */
+int SysCreateSemaphore(int virtAddr, int semval)
+{
+	char *name = User2System(virtAddr, BUFFER_MAX_LENGTH);
+	if (name == NULL || strlen(name) == 0)
+	{
+		return -1;
+	}
+
+	return kernel->semTab->Create(name, semval);
+}
+
+/*	Input: 	Address store semaphore's name in user mode
+	Output: 0 if successful, otherwise -1
+	Purpose: Release the waiting process */
+int SysSignal(int virtAddr)
+{
+	char *name = User2System(virtAddr, BUFFER_MAX_LENGTH);
+	if (name == NULL || strlen(name) == 0)
+	{
+		return -1;
+	}
+
+	return kernel->semTab->Signal(name);
+}
+
+/*	Input: 	Address store semaphore's name in user mode
+	Output: 0 if successful, otherwise -1
+	Purpose: Wait a process */
+int SysWait(int virtAddr)
+{
+	char *name = User2System(virtAddr, BUFFER_MAX_LENGTH);
+	if (name == NULL || strlen(name) == 0)
+	{
+		return -1;
+	}
+
+	return kernel->semTab->Wait(name);
+}
+
+/*	Input: 	None
+	Output: ID of the current process
+	Purpose: Get ID of the current process */
+int SysGetCurrentProcessId(){
+	return kernel->currentThread->processID;
 }
 
 #endif /* ! __USERPROG_KSYSCALL_H__ */

@@ -235,6 +235,46 @@ PrintString:
 	syscall
 	j	$31
 	.end PrintString
+
+	.globl CreateFile
+	.ent	CreateFile
+CreateFile:
+	addiu $2,$0,SC_CreateFile
+	syscall
+	j	$31
+	.end CreateFile
+
+	.globl GetCurrentProcessId
+	.ent	GetCurrentProcessId
+GetCurrentProcessId:
+	addiu $2,$0,SC_GetCurrentProcessId
+	syscall
+	j	$31
+	.end GetCurrentProcessId
+	
+	.globl CreateSemaphore
+	.ent	CreateSemaphore
+CreateSemaphore:
+	addiu $2,$0,SC_CreateSemaphore
+	syscall
+	j	$31
+	.end CreateSemaphore
+
+	.globl Signal
+	.ent	Signal
+Signal:
+	addiu $2,$0,SC_Signal
+	syscall
+	j	$31
+	.end Signal
+
+	.globl Wait
+	.ent	Wait
+Wait:
+	addiu $2,$0,SC_Wait
+	syscall
+	j	$31
+	.end Wait
 		
 /* dummy function to keep gcc happy */
         .globl  __main

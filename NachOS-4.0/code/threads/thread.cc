@@ -45,6 +45,7 @@ Thread::Thread(char* threadName)
 					// of machine registers
     }
     space = NULL;
+    processID = 0;
 }
 
 //----------------------------------------------------------------------
@@ -434,3 +435,11 @@ Thread::SelfTest()
     SimpleThread(0);
 }
 
+void Thread::FreeSpace()
+{
+    if (space != NULL)
+    {
+        delete space;
+        space = NULL;
+    }
+}
