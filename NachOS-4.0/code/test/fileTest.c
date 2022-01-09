@@ -7,28 +7,30 @@ int main(){
     char buffer[100];
     char* text = "Hello World!\n";
     
+    // test syscall Open
+    PrintString("Open read only testFile1.txt\n");
+    fd = Open("./test/testFile1.txt", 1);
+
+    PrintString("Read from testFile: ");
+    Read(buffer, 10, fd);
+    PrintString(buffer); 
+
+    Close(fd);
+    PrintString("Closed testFile1.txt\n");
+
     // test syscall CreateFile
-    PrintString("Create testFile.txt\n");
-    result = CreateFile("./test/testFile.txt");
+    PrintString("Create testFile2.txt\n");
+    result = CreateFile("./test/testFile2.txt");
     if (result == 0)
         PrintString("Create file successfully.\n");
     else
         PrintString("Create file unsuccessfully.\n");
 
-    // test syscall Open
-    PrintString("Open file...\nEnter type: ");
-    //type = ReadNum();
-    fd = Open("./test/testFile.txt", 0);
-
-    // write Hello World to testFile
-    Write(text, 5, fd);
-    PrintString("Read from testFile: ");
-    len = Read(buffer, 10, fd);
-    buffer[len] = '\0';
-    PrintString(buffer); // print ko ra 
+    PrintString("Open read write testFile2.txt\n");
+    fd = Open("./test/testFile2.txt", 0);
 
     // test read write console
-    PrintString("\nEnter a text to write to opened file: ");
+    PrintString("Enter a text to write to opened file: ");
     len = Read(buffer, 10, 0);
     PrintString("The entered text is: ");
     Write(buffer, len, 1);
@@ -36,8 +38,8 @@ int main(){
     // write the entered text to file
     Write(buffer, len, fd);
 
-    // close file
     Close(fd);
+    PrintString("\nClosed testFile2.txt\n");
 
     Halt();
     return 0;
