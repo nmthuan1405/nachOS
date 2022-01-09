@@ -275,40 +275,49 @@ int SysPrintString(int virtAddr)
 	return count;
 }
 
+/*	Input: Address of buffer stores file name in user space
+	Output: 0 if successful, otherwise -1
+	Purpose: Create an empty file */
 int SysCreateFile(int virtAddr)
 {
 	char *name = User2System(virtAddr, FILE_MAX_LENGTH + 1);
 	if (strlen(name) == 0)
 	{
-		printf("Invalid file name!");
+		DEBUG(dbgSys, "Invalid file name!");
 		return -1;
 	}
 	if (name == NULL)
 	{
-		printf("Not enough system memory!");
+		DEBUG(dbgSys, "Not enough system memory!");
 		delete[] name;
 		return -1;
 	}
 	if (!kernel->fileSystem->Create(name, 0))
 	{
-		printf("Create file unsuccessfully!");
+		DEBUG(dbgSys, "Create file unsuccessfully!");
 		delete[] name;
 		return -1;
 	}
-	printf("Create file successfully!");
+	DEBUG(dbgSys, "Create file successfully!");
 	delete[] name;
 	return 0;
 }
 
+/*	Input: 	Address of buffer stores file name in user space
+			Type 0 for read and write mode, 1 for read only mode
+	Output: 0 if successful, otherwise -1
+	Purpose: Open a file */
 int SysOpen(int virAddr, int type)
 {
-	if (type != 0 && type != 1)
+	if (type != 0 && type != 1){
+		DEBUG(dbgSys, "Invalid type!");
 		return -1;
+	}
 
 	char *name = User2System(virAddr, BUFFER_MAX_LENGTH);
 	if (name == NULL || strlen(name) == 0)
 	{
-		printf("Invalid file name!");
+		DEBUG(dbgSys, "Invalid file name!");
 		return -1;
 	}
 
@@ -316,7 +325,7 @@ int SysOpen(int virAddr, int type)
 	int id = curr->filemap->FindAndSet();
 	if (id == -1)
 	{
-		printf("Not enough file descriptor!");
+		DEBUG(dbgSys, "Not enough file descriptor!");
 		delete[] name;
 		return -1;
 	}
@@ -324,7 +333,7 @@ int SysOpen(int virAddr, int type)
 	FILE *f = fopen(name, type == 0 ? "ab+" : "rb");
 	if (f == NULL)
 	{
-		printf("File does not exist!");
+		DEBUG(dbgSys, "File does not exist!");
 		curr->filemap->Clear(id);
 		delete[] name;
 		return -1;
@@ -335,6 +344,9 @@ int SysOpen(int virAddr, int type)
 	return id;
 }
 
+/*	Input: File's ID in file table
+	Output: 0 if successful, otherwise -1
+	Purpose: Close a file */
 int SysClose(int id)
 {
 	if (id <= 1 || id >= MAX_FILE)
@@ -343,7 +355,7 @@ int SysClose(int id)
 	PCB *curr = kernel->pTab->getCurrentPCB();
 	if (!curr->filemap->Test(id))
 	{
-		printf("File descriptor does not exist!");
+		DEBUG(dbgSys, "File descriptor does not exist!");
 		return -1;
 	}
 
@@ -353,6 +365,11 @@ int SysClose(int id)
 	return 0;
 }
 
+/*	Input: 	Address store the buffer in user mode
+			Maximum number of characters read
+			ID of file read
+	Output: Actual number of characters read
+	Purpose: Read from a file or console */
 int SysRead(int virAddr, int charcount, int id)
 {
 	if (id == 0)
@@ -364,21 +381,21 @@ int SysRead(int virAddr, int charcount, int id)
 	PCB *curr = kernel->pTab->getCurrentPCB();
 	if (!curr->filemap->Test(id))
 	{
-		printf("File descriptor does not exist!");
+		DEBUG(dbgSys, "File descriptor does not exist!");
 		return -1;
 	}
 
 	char *buffer = new char[charcount + 1];
 	if (buffer == NULL)
 	{
-		printf("Not enough system memory!");
+		DEBUG(dbgSys, "Not enough system memory!");
 		return -1;
 	}
 
 	int count = fread(buffer, 1, charcount, curr->fileTable[id]);
 	if (count == 0)
 	{
-		printf("End of file!");
+		DEBUG(dbgSys, "End of file!");
 		delete[] buffer;
 		return -2;
 	}
@@ -388,6 +405,11 @@ int SysRead(int virAddr, int charcount, int id)
 	return count;
 }
 
+/*	Input: 	Address store the buffer in user mode
+			Maximum number of characters written
+			ID of file read
+	Output: Actual number of characters written
+	Purpose: Write to a file or console */
 int SysWrite(int virAddr, int charcount, int id)
 {
 	if (id == 1)
@@ -399,14 +421,14 @@ int SysWrite(int virAddr, int charcount, int id)
 	PCB *curr = kernel->pTab->getCurrentPCB();
 	if (!curr->filemap->Test(id))
 	{
-		printf("File descriptor does not exist!");
+		DEBUG(dbgSys, "File descriptor does not exist!");
 		return -1;
 	}
 
 	char *string = User2System(virAddr, charcount);
 	if (string == NULL)
 	{
-		printf("Not enough system memory!");
+		DEBUG(dbgSys, "Not enough system memory!");
 		return -1;
 	}
 
@@ -415,6 +437,9 @@ int SysWrite(int virAddr, int charcount, int id)
 	return count;
 }
 
+/*	Input: 	Address store program's name in user mode
+	Output: Program's ID or -1 if unsuccessful
+	Purpose: Execute a program in a new thread */
 int SysExec(int virAddr)
 {
 	char *fileName = User2System(virAddr, BUFFER_MAX_LENGTH);
@@ -427,11 +452,17 @@ int SysExec(int virAddr)
 	return pid;
 }
 
+/*	Input: 	ID of program 
+	Output: exitcode = 0 if successul, otherwise -1 or error code
+	Purpose: Wait and block a process */
 int SysJoin(int id)
 {
 	return kernel->pTab->JoinUpdate(id);
 }
 
+/*	Input: 	exitcode of joined program
+	Output: exitcode of joined program
+	Purpose: exit the joined process */
 int SysExit(int ec)
 {
 	if (ec == 0)
@@ -443,6 +474,10 @@ int SysExit(int ec)
 	return ec;
 }
 
+/*	Input: 	Address store semaphore's name in user mode
+			Value of semaphore
+	Output: 0 if successful, otherwise -1
+	Purpose: create a semaphore */
 int SysCreateSemaphore(int virtAddr, int semval)
 {
 	char *name = User2System(virtAddr, BUFFER_MAX_LENGTH);
@@ -454,6 +489,9 @@ int SysCreateSemaphore(int virtAddr, int semval)
 	return kernel->semTab->Create(name, semval);
 }
 
+/*	Input: 	Address store semaphore's name in user mode
+	Output: 0 if successful, otherwise -1
+	Purpose: Release the waiting process */
 int SysSignal(int virtAddr)
 {
 	char *name = User2System(virtAddr, BUFFER_MAX_LENGTH);
@@ -465,6 +503,9 @@ int SysSignal(int virtAddr)
 	return kernel->semTab->Signal(name);
 }
 
+/*	Input: 	Address store semaphore's name in user mode
+	Output: 0 if successful, otherwise -1
+	Purpose: Wait a process */
 int SysWait(int virtAddr)
 {
 	char *name = User2System(virtAddr, BUFFER_MAX_LENGTH);
@@ -476,6 +517,9 @@ int SysWait(int virtAddr)
 	return kernel->semTab->Wait(name);
 }
 
+/*	Input: 	None
+	Output: ID of the current process
+	Purpose: Get ID of the current process */
 int SysGetCurrentProcessId(){
 	return kernel->currentThread->processID;
 }
