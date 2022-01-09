@@ -103,7 +103,7 @@ Kernel::Initialize()
     synchDisk = new SynchDisk();    //
 
     addrLock = new Semaphore("addrLock", 1);
-    gPhysPageBitMap = new Bitmap(256);
+    gPhysPageBitMap = new Bitmap(NumPhysPages);
     semTab = new STable();
     pTab = new PTable(10);
 
