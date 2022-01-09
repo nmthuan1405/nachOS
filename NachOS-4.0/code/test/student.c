@@ -27,6 +27,7 @@ void writeToFile(char *fileName, int id)
 
     id = id + '0';
     Write(&id, 1, f);
+    Write(" ", 1, f);
     Close(f);
 }
 

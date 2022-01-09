@@ -35,6 +35,8 @@ int readInputNumber(char* fileName) {
         Exit(1);
     }
 
+    Close(inputId);
+
     return result - '0';
 }
 

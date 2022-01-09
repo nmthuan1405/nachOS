@@ -3,6 +3,7 @@
 int main(){
     int result;
     int fd, type;
+    int len;
     char buffer[100];
     char* text = "Hello World!\n";
     
@@ -20,19 +21,20 @@ int main(){
     fd = Open("./test/testFile.txt", 0);
 
     // write Hello World to testFile
-    Write(text, 20, fd);
-    //PrintString("Read from testFile: ");
-    Read(buffer, 20, fd);
+    Write(text, 5, fd);
+    PrintString("Read from testFile: ");
+    len = Read(buffer, 10, fd);
+    buffer[len] = '\0';
     PrintString(buffer); // print ko ra 
 
     // test read write console
     PrintString("\nEnter a text to write to opened file: ");
-    Read(buffer, 10, 0);
+    len = Read(buffer, 10, 0);
     PrintString("The entered text is: ");
-    Write(buffer, 10, 1);
+    Write(buffer, len, 1);
 
     // write the entered text to file
-    Write(buffer, 10, fd);
+    Write(buffer, len, fd);
 
     // close file
     Close(fd);
