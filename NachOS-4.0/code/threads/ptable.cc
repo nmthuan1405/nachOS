@@ -2,11 +2,15 @@
 
 PTable::PTable(int size)
 {
-    psize = size;
+    if (size <= MAX_PROCESS)
+        psize = size;
+    else
+        psize = MAX_PROCESS;
+
     bm = new Bitmap(size);
     bmsem = new Semaphore("bmsem", 1);
 
-    for (int i = 0; i < MAX_PROCESS; i++)
+    for (int i = 0; i < psize; i++)
     {
         pcb[i] = NULL;
     }
@@ -30,7 +34,7 @@ PTable::~PTable()
         bmsem = NULL;
     }
 
-    for (int i = 0; i < MAX_PROCESS; i++)
+    for (int i = 0; i < psize; i++)
     {
         if (pcb[i] != NULL)
         {
@@ -122,7 +126,7 @@ int PTable::ExitUpdate(int ec)
 int PTable::JoinUpdate(int id)
 {
     // Kiem tra tinh hop le cua id
-    if (id < 0 || id >= MAX_PROCESS)
+    if (id < 0 || id >= psize)
     {
         printf("Invalid ID\n");
         return -1;
