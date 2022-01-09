@@ -105,9 +105,8 @@ bool AddrSpace::Load(char *fileName)
 {
     OpenFile *executable = kernel->fileSystem->Open(fileName);
     NoffHeader noffH;
-    unsigned int size, i, j;
-    unsigned int numCodePage, numDataPage;
-    int lastCodePageSize, lastDataPageSize, firstDataPageSize, tempDataSize;
+    unsigned int size, i;
+
     if (executable == NULL)
     {
         cerr << "Unable to open file " << fileName << "\n";
