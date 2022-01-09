@@ -1,37 +1,41 @@
 #include "syscall.h"
-#include "FileTable.h"
+
+typedef OpenFileId;
 
 void getWater(){
-    for (int i = 0; i < 1000; i++){
+    int i;
+    for (i = 0; i < 1000; i++){
 
     }
 }
 
 int main(){
-
-    for (int i = 0; i < 10; i++){
+    int i;
+    OpenFileId outputId;
+    char id;
+    for (i = 0; i < 10; i++){
         // Acquire voi nuoc
-        Wait("water");
+        Down("water");
 
         // Lay 1 lit nuoc
         getWater();
 
         // Mo file doc ghi output.txt
-        OpenFileId outputId = Open("output.txt", 0);
+        outputId = Open("output.txt", 0);
         if (outputId == -1){
             return 1;
         }
 
         // Ghi id tien trinh (sinh vien) vao file output.txt
-        char id = GetCurrentProcessId() + '0';
-        Write(id, 1, outputId);
-        Wrire(' ', 1, outputId);
+        id = GetCurrentProcessId() + '0';
+        Write(&id, 1, outputId);
+        Write(" ", 1, outputId);
 
         // Dong file output.txt
         Close(outputId);
 
         // Release voi nuoc
-        Signal("water");
+        Up("water");
     }
 
     return 0;
