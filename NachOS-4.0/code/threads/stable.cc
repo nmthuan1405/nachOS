@@ -14,6 +14,7 @@ STable::~STable()
         delete bm;
         bm = NULL;
     }
+
     for (int i = 0; i < MAX_SEMAPHORE; ++i)
     {
         if (semTab[i] != NULL)

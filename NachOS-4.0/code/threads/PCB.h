@@ -13,18 +13,17 @@ private:
     Semaphore *multex;  // semaphore for exclusive access
     int exitcode;
     int numwait; // number of process joined
-    
+
     Thread *thread;
 
 public:
     int parentID;
 
-    FILE** fileTable;
-    Bitmap* filemap;
+    FILE **fileTable;
+    Bitmap *filemap;
 
 public:
     PCB();
-    PCB(int id);
     ~PCB();
 
     int Exec(char *filename, int pid);
@@ -47,5 +46,5 @@ public:
     char *GetFileName();
 };
 
-void StartProcess_2(int id);
+void StartProcess(int id);
 #endif

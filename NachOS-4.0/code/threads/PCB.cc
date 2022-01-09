@@ -19,32 +19,6 @@ PCB::PCB()
     parentID = 0;
 }
 
-PCB::PCB(int id)
-{
-    joinsem = new Semaphore("joinsem", 0);
-    exitsem = new Semaphore("exitsem", 0);
-    multex = new Semaphore("multex", 1);
-
-    numwait = 0;
-    exitcode = 0;
-
-    fileTable = new FILE *[MAX_FILE];
-    filemap = new Bitmap(MAX_FILE);
-    filemap->Mark(0);
-    filemap->Mark(1);
-
-    thread = NULL;
-
-    if (id == 0)
-    {
-        this->parentID = 0;
-    }
-    else
-    {
-        this->parentID = kernel->currentThread->processID;
-    }
-}
-
 PCB::~PCB()
 {
     if (joinsem != NULL)
@@ -52,27 +26,25 @@ PCB::~PCB()
         delete joinsem;
         joinsem = NULL;
     }
+
     if (exitsem != NULL)
     {
         delete exitsem;
         exitsem = NULL;
     }
+
     if (multex != NULL)
     {
         delete multex;
         multex = NULL;
     }
-    if (thread != NULL)
-    {
-        thread->FreeSpace();
-        thread->Finish();
-        // delete thread;
-    }
+
     if (fileTable != NULL)
     {
         delete[] fileTable;
         fileTable = NULL;
     }
+
     if (filemap != NULL)
     {
         delete filemap;
@@ -100,7 +72,7 @@ int PCB::Exec(char *filename, int id)
     // Đặt parrentID của thread này là processID của thread gọi thực thi Exec
     this->parentID = kernel->currentThread->processID;
     // Gọi thực thi Fork(StartProcess_2,id) => Ta cast thread thành kiểu int, sau đó khi xử ký hàm StartProcess ta cast Thread về đúng kiểu của nó.
-    this->thread->Fork((VoidFunctionPtr)StartProcess_2, (void *)id);
+    this->thread->Fork((VoidFunctionPtr)StartProcess, (void *)id);
 
     multex->V();
     // Trả về id.
@@ -174,7 +146,7 @@ char *PCB::GetFileName()
     return thread->name;
 }
 
-void StartProcess_2(int id)
+void StartProcess(int id)
 {
     // Lay fileName cua process id nay
     char *fileName = kernel->pTab->GetFileName(id);

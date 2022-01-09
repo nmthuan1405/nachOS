@@ -10,24 +10,27 @@
 class PCB;
 class Semaphore;
 
-class PTable{
-    private:
-        Bitmap *bm;
-        PCB *pcb[MAX_PROCESS];
-        int psize;
-        Semaphore* bmsem;
-    public:
-        PTable(int size);
-        ~PTable();
-        int ExecUpdate(char* name);
-        int ExitUpdate(int ec);
-        int JoinUpdate(int id);
-        int GetFreeSlot();
-        bool IsExist(int pid);
-        void Remove(int pid);
-        char* GetFileName(int id);
+class PTable
+{
+private:
+    Bitmap *bm;
+    PCB *pcb[MAX_PROCESS];
+    int psize;
+    Semaphore *bmsem;
 
-        PCB* getCurrentPCB();
+public:
+    PTable(int size);
+    ~PTable();
+
+    int ExecUpdate(char *name);
+    int ExitUpdate(int ec);
+    int JoinUpdate(int id);
+    int GetFreeSlot();
+    bool IsExist(int pid);
+    void Remove(int pid);
+    char *GetFileName(int id);
+
+    PCB *getCurrentPCB();
 };
 
 #endif
