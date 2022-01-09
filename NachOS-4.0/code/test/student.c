@@ -1,40 +1,47 @@
 #include "syscall.h"
+#define OUTPUT_FILE "./test/output.txt"
 
 typedef OpenFileId;
 
-void getWater(){
+void getWater()
+{
     int i;
-    for (i = 0; i < 1000; i++){
-
+    for (i = 0; i < 1000; i++)
+    {
+        // get water...
     }
-    PrintNum(GetCurrentProcessId());
-    PrintString("Lay nuoc\n");
+
+    writeToFile(OUTPUT_FILE, GetCurrentProcessId());
 }
 
-int main(){
+void writeToFile(char *fileName, int id)
+{
+    OpenFileId f;
+
+    f = Open(fileName, 0);
+    if (f == -1)
+    {
+        PrintString("Error opening file\n");
+        Exit(1);
+    }
+
+    id = id + '0';
+    Write(&id, 1, f);
+    Close(f);
+}
+
+int main()
+{
     int i;
     OpenFileId outputId;
     char id;
-    for (i = 0; i < 10; i++){
+    for (i = 0; i < 10; i++)
+    {
         // Acquire voi nuoc
         Wait("water");
 
         // Lay 1 lit nuoc
         getWater();
-
-        // Mo file doc ghi output.txt
-        outputId = Open("./test/output.txt", 0);
-        if (outputId == -1){
-            return 1;
-        }
-
-        // Ghi id tien trinh (sinh vien) vao file output.txt
-        id = GetCurrentProcessId() + '0';
-        Write(&id, 1, outputId);
-        Write(" ", 1, outputId);
-
-        // Dong file output.txt
-        Close(outputId);
 
         // Release voi nuoc
         Signal("water");

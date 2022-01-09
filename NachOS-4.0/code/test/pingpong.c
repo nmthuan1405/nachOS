@@ -1,8 +1,9 @@
 #include "syscall.h"
 
+typedef SpaceId;
 int main() 
 {
-	int pingPID, pongPID;
+	SpaceId pingPID, pongPID;
 
 	PrintString("Ping-Pong test starting ...\n");
 	
