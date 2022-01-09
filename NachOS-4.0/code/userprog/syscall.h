@@ -47,8 +47,8 @@
 #define SC_CreateFile 50
 
 #define SC_CreateSemaphore 51
-#define SC_Up            52
-#define SC_Down          53
+#define SC_Signal            52
+#define SC_Wait          53
 
 #define SC_GetCurrentProcessId 60
 
@@ -213,8 +213,8 @@ void ThreadExit(int ExitCode);
 int CreateFile(char *name);
 
 int CreateSemaphore(char* name, int semval);
-int Up(char* name);
-int Down(char* name);
+int Signal(char* name);
+int Wait(char* name);
 
 int GetCurrentProcessId();
 

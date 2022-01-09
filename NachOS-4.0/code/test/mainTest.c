@@ -4,7 +4,7 @@ typedef OpenFileId;
 typedef SpaceId;
 
 int main(){
-    int isCreateSem, n, i, isRead;
+    int isCreateSem, n, i, isRead, isCreateFile;
     OpenFileId inputId;
     char buffer;
     SpaceId id[5];
@@ -16,8 +16,14 @@ int main(){
     }
 
     // Mo file chi doc input.txt
-    inputId = Open("input.txt", 1);
+    inputId = Open("./test/input.txt", 1);
     if (inputId == -1){
+        return 1;
+    }
+
+    // Tao file doc ghi ket qua output.txt
+    isCreateFile = CreateFile("./test/output.txt");
+    if (isCreateFile == -1){
         return 1;
     }
 

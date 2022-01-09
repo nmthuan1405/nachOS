@@ -454,7 +454,7 @@ int SysCreateSemaphore(int virtAddr, int semval)
 	return kernel->semTab->Create(name, semval);
 }
 
-int SysUp(int virtAddr)
+int SysSignal(int virtAddr)
 {
 	char *name = User2System(virtAddr, BUFFER_MAX_LENGTH);
 	if (name == NULL || strlen(name) == 0)
@@ -465,7 +465,7 @@ int SysUp(int virtAddr)
 	return kernel->semTab->Signal(name);
 }
 
-int SysDown(int virtAddr)
+int SysWait(int virtAddr)
 {
 	char *name = User2System(virtAddr, BUFFER_MAX_LENGTH);
 	if (name == NULL || strlen(name) == 0)

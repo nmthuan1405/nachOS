@@ -7,6 +7,8 @@ void getWater(){
     for (i = 0; i < 1000; i++){
 
     }
+    PrintNum(GetCurrentProcessId());
+    PrintString("Lay nuoc\n");
 }
 
 int main(){
@@ -15,13 +17,13 @@ int main(){
     char id;
     for (i = 0; i < 10; i++){
         // Acquire voi nuoc
-        Down("water");
+        Wait("water");
 
         // Lay 1 lit nuoc
         getWater();
 
         // Mo file doc ghi output.txt
-        outputId = Open("output.txt", 0);
+        outputId = Open("./test/output.txt", 0);
         if (outputId == -1){
             return 1;
         }
@@ -35,7 +37,7 @@ int main(){
         Close(outputId);
 
         // Release voi nuoc
-        Up("water");
+        Signal("water");
     }
 
     return 0;
