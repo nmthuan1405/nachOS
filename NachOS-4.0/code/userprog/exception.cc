@@ -542,13 +542,13 @@ void ExceptionHandler(ExceptionType which)
             break;
         }
 
-        case SC_Up:
+        case SC_Signal:
         {
-            DEBUG(dbgSys, "Up\n");
+            DEBUG(dbgSys, "Signal\n");
             int result;
-            result = SysUp((int)kernel->machine->ReadRegister(4));
+            result = SysSignal((int)kernel->machine->ReadRegister(4));
             
-            DEBUG(dbgSys, "SysUp returning with " << result << "\n");
+            DEBUG(dbgSys, "SysSignal returning with " << result << "\n");
             kernel->machine->WriteRegister(2, (int)result);
 
             /* Modify return point */
@@ -568,13 +568,13 @@ void ExceptionHandler(ExceptionType which)
             break;
         }
 
-        case SC_Down:
+        case SC_Wait:
         {
-            DEBUG(dbgSys, "Down\n");
+            DEBUG(dbgSys, "Wait\n");
             int result;
-            result = SysDown((int)kernel->machine->ReadRegister(4));
+            result = SysWait((int)kernel->machine->ReadRegister(4));
             
-            DEBUG(dbgSys, "SysDown returning with " << result << "\n");
+            DEBUG(dbgSys, "SysWait returning with " << result << "\n");
             kernel->machine->WriteRegister(2, (int)result);
 
             /* Modify return point */
