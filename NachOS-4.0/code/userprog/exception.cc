@@ -488,10 +488,7 @@ void ExceptionHandler(ExceptionType which)
         case SC_Exit:
         {
             DEBUG(dbgSys, "Exit\n");
-            result = SysExit((int)kernel->machine->ReadRegister(4));
-
-            DEBUG(dbgSys, "SysExit returning with " << result << "\n");
-            kernel->machine->WriteRegister(2, (int)result);
+            SysExit((int)kernel->machine->ReadRegister(4));
 
             /* Modify return point */
             {

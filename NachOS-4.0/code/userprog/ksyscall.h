@@ -460,18 +460,14 @@ int SysJoin(int id)
 	return kernel->pTab->JoinUpdate(id);
 }
 
-/*	Input: 	exitcode of joined program
-	Output: exitcode of joined program
-	Purpose: exit the joined process */
-int SysExit(int ec)
+/*	Input: 	Exitcode of joined program
+	Output: None
+	Purpose: Exit the joined process */
+void SysExit(int ec)
 {
-	if (ec == 0)
-	{
-		ec = kernel->pTab->ExitUpdate(ec);
-		kernel->currentThread->FreeSpace();
-		kernel->currentThread->Finish();
-	}
-	return ec;
+	ec = kernel->pTab->ExitUpdate(ec);
+	kernel->currentThread->FreeSpace();
+	kernel->currentThread->Finish();
 }
 
 /*	Input: 	Address store semaphore's name in user mode
