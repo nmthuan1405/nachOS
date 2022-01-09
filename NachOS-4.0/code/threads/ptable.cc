@@ -62,7 +62,7 @@ int PTable::ExecUpdate(char *name)
     delete file;
 
     // So sánh tên chương trình và tên của currentThread để chắc chắn rằng chương trình này không gọi thực thi chính nó.
-    if (strcmp(name, "./test/scheduler") == 0 || strcmp(name, kernel->currentThread->getName()) == 0)
+    if (strcmp(name, kernel->currentThread->getName()) == 0)
     {
         bmsem->V();
         return -1;
